@@ -45,6 +45,7 @@
 * **Regra 7 (Imutabilidade de Relatórios e White-Label):** Ao clicar em "Gerar Relatório" (PDF ou PPT), os dados exportados devem representar um snapshot exato da inspeção atual. Quaisquer logótipos ou informações de empresa alteradas na tab de Configurações (White-label) devem refletir-se imediatamente no cabeçalho dos documentos gerados, permitindo que a Facilit'Air entregue o relatório com a identidade visual do cliente final.
 * **Regra 8 (Tipos de Falha - Sujeira vs. Sombreamento):** Deve-se diferenciar 'Sujeira' de 'Sombreamento' (Shadowing). Enquanto a sujeira é avaliada prioritariamente pelo $\Delta$T, o sombreamento deve ter sua severidade calculada baseada na área afetada do módulo, independentemente de um $\Delta$T elevado.
 * **Regra 9 (Hierarquia de Ativos e Localização):** Todo diagnóstico de anomalia deve obrigatoriamente conter sua localização hierárquica: Rota (ex: RT-01), String (ex: ST-04) e Posição do Módulo (Superior ou Inferior).
+* **Regra 10 (Relatórios Executivos):** Os relatórios gerados para o cliente final devem ser uma síntese da inteligência validada. Devem expor apenas as anomalias que foram analisadas pelo operador (status diferente de 'Pendente') e ocultar obrigatoriamente anomalias marcadas como 'Falso Positivo'.
 
 ## 🧹 5. Clean Code & Style Guide
 * **Nomenclatura:** Componentes React sempre em `PascalCase`. Funções e variáveis em `camelCase`. Nomes descritivos.

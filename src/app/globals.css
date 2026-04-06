@@ -5,6 +5,7 @@
   --color-slate-950: #020617;
   --color-amber-400: #fbbf24;
   --color-amber-500: #f59e0b;
+  --color-primary: var(--primary-color, #4f46e5);
 }
 
 :root {
@@ -30,4 +31,33 @@ body {
     )
     rgb(var(--background-start-rgb));
   min-height: 100vh;
+}
+
+/* =========================================
+   SCROLLBAR OCULTA — Definitiva
+   Usando @layer utilities para garantir que o
+   Tailwind v4 injete sem purge.
+   ========================================= */
+@layer utilities {
+  .no-scrollbar {
+    -ms-overflow-style: none;   /* IE / Edge */
+    scrollbar-width: none;      /* Firefox */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;              /* Chrome, Safari, Opera */
+  }
+}
+
+/* Fallback via seletor direto (não depende de Tailwind) */
+aside nav,
+aside [data-nav],
+aside .overflow-y-auto {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+aside nav::-webkit-scrollbar,
+aside [data-nav]::-webkit-scrollbar,
+aside .overflow-y-auto::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
 }

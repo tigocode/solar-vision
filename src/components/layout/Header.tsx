@@ -1,9 +1,45 @@
+'use client';
+
 import React from 'react';
 import { Search, Bell, ChevronRight, Menu } from 'lucide-react';
 import { useUI } from '@/hooks/useUI';
+import { usePathname } from 'next/navigation';
 
 const Header = () => {
   const { viewMode, toggleMenu } = useUI();
+  const pathname = usePathname();
+
+  const getBreadcrumbs = () => {
+    if (!pathname) return ['Dashboard'];
+    
+    const routeMap: Record<string, string> = {
+      'dashboard': 'Dashboard',
+      'configuracoes': 'Configurações',
+      'historico': 'Histórico',
+      'relatorios': 'Relatórios',
+      'diagnostico': 'Diagnóstico Técnico',
+      'plantas': 'Projetos',
+      'novo': 'Novo Cadastro',
+      'upload': 'Upload de Dados',
+      'nova-inspecao': 'Nova Inspeção',
+    };
+
+    const segments = pathname.split('/').filter(Boolean);
+    
+    if (segments.length === 1 && segments[0] === 'dashboard') {
+      return ['Dashboard'];
+    }
+
+    // Exclui o root 'dashboard' quando há sub-rotas para manter limpo
+    const crumbs = [];
+    for (let i = 1; i < segments.length; i++) {
+      crumbs.push(routeMap[segments[i]] || segments[i]);
+    }
+    
+    return crumbs.length > 0 ? crumbs : ['Dashboard'];
+  };
+
+  const breadcrumbs = getBreadcrumbs();
 
   return (
     <header className="h-20 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between flex-shrink-0 sticky top-0 z-40">
@@ -18,12 +54,15 @@ const Header = () => {
         </button>
 
         <div className="hidden sm:flex items-center text-sm font-medium text-slate-500">
-        <span className="hover:text-slate-800 cursor-pointer">Projetos</span>
-        <ChevronRight size={14} className="mx-2" />
-        <span className="hover:text-slate-800 cursor-pointer">UFV Amostra (SolarVision)</span>
-        <ChevronRight size={14} className="mx-2" />
-        <span className="text-slate-800 font-bold">Dashboard</span>
-      </div>
+          {breadcrumbs.map((crumb, idx) => (
+             <React.Fragment key={idx}>
+                {idx > 0 && <ChevronRight size={14} className="mx-2" />}
+                <span className={idx === breadcrumbs.length - 1 ? "text-slate-800 font-bold" : "hover:text-slate-800 cursor-pointer"}>
+                  {crumb}
+                </span>
+             </React.Fragment>
+          ))}
+        </div>
       </div>
 
       {/* TOP ACTIONS */}

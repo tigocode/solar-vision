@@ -1,5 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
+import { BrandProvider } from "@/contexts/BrandContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,7 +16,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="pt-BR">
       <body className="antialiased">
-        {children}
+        <BrandProvider>
+          {children}
+        </BrandProvider>
       </body>
     </html>
   );

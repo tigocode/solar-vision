@@ -5,7 +5,7 @@
 
 export type Severity = 'Crítico' | 'Médio' | 'Baixo';
 
-export type AnomalyStatus = 'Pendente' | 'Resolvido' | 'Em Análise';
+export type AnomalyStatus = 'Pendente' | 'Em Análise' | 'Falso Positivo' | 'Resolvido';
 
 /**
  * Coordenadas da Bounding Box (Regra 5)
@@ -47,16 +47,11 @@ export interface Anomaly {
   };
 
   // Imagens Sincronizadas (Regra 5)
-  imageUrls: {
-    thermal: string;      // URL da imagem IR
-    visual: string;       // URL da imagem RGB
-  };
+  irUrl: string;          // URL da imagem IR (Termográfica)
+  rgbUrl: string;         // URL da imagem RGB (Visual)
 
-  // Marcações Geométricas (Regra 5)
-  boundingBox: {
-    thermal: BoundingBox;
-    visual: BoundingBox;
-  };
+  // Marcações Geométricas Unificadas (Regra 5)
+  boundingBox: BoundingBox; 
 
   // Metadados para Sombreamento (Regra 8)
   affectedArea?: number;  // Área afetada em percentual (0 a 100)
