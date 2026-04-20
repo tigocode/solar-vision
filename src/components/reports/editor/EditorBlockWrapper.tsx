@@ -12,6 +12,7 @@ interface EditorBlockWrapperProps {
   onGeometryChange: (data: { x: number, y: number, width: number, height: number }) => void;
   scale: number;
   children: React.ReactNode;
+  hideUI?: boolean;
 }
 
 export default function EditorBlockWrapper({ 
@@ -20,46 +21,51 @@ export default function EditorBlockWrapper({
   onClick, 
   onGeometryChange,
   scale,
-  children 
+  children,
+  hideUI = false
 }: EditorBlockWrapperProps) {
   return (
     <Rnd
       size={{ width: block.width, height: block.height }}
       position={{ x: block.x, y: block.y }}
       onDragStop={(e, d) => {
-        onGeometryChange({ x: d.x, y: d.y, width: block.width, height: block.height });
+        if (!hideUI) onGeometryChange({ x: d.x, y: d.y, width: block.width, height: block.height });
       }}
       onResizeStop={(e, direction, ref, delta, position) => {
-        onGeometryChange({
-          x: position.x,
-          y: position.y,
-          width: parseInt(ref.style.width),
-          height: parseInt(ref.style.height),
-        });
+        if (!hideUI) {
+          onGeometryChange({
+            x: position.x,
+            y: position.y,
+            width: parseInt(ref.style.width),
+            height: parseInt(ref.style.height),
+          });
+        }
       }}
       scale={scale}
       bounds="parent"
-      enableResizing={isSelected}
-      disableDragging={!isSelected}
+      enableResizing={!hideUI && isSelected}
+      disableDragging={hideUI || !isSelected}
       onClick={(e) => {
-        e.stopPropagation();
-        onClick();
+        if (!hideUI) {
+          e.stopPropagation();
+          onClick();
+        }
       }}
       style={{
         zIndex: isSelected ? 50 : 10,
       }}
       dragHandleClassName="drag-handle"
-      className={`group transition-shadow duration-200 ${
-        isSelected 
+      className={`group transition-all duration-200 ${
+        !hideUI && isSelected 
           ? 'ring-2 ring-amber-500 shadow-xl' 
-          : 'hover:ring-2 hover:ring-amber-500/30'
+          : !hideUI ? 'hover:ring-2 hover:ring-amber-500/30' : ''
       }`}
     >
       <div className="w-full h-full relative" style={{ ...block.style }}>
         {children}
 
-        {/* Floating Toolbar / Drag Handle */}
-        {isSelected && (
+        {/* Floating Toolbar / Drag Handle - Hidden in Preview/HideUI */}
+        {!hideUI && isSelected && (
           <div className="absolute -top-10 left-0 bg-slate-800 text-white rounded-md shadow-lg flex items-center p-1 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
             <button className="p-1.5 hover:bg-slate-700 rounded cursor-grab drag-handle" title="Mover">
               <GripHorizontal size={14} />

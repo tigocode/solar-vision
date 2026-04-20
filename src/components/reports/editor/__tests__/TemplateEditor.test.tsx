@@ -59,4 +59,33 @@ describe('TemplateEditor - Novas Funcionalidades', () => {
     // Verifica se agora existem 3 páginas na navegação e se o editor navegou para a nova página (Página 3)
     expect(screen.getByText(/Página 3 de 3/i)).toBeInTheDocument();
   });
+
+  it('deve alternar entre abas do Painel de Ativos (Design, Variáveis, etc)', () => {
+    render(<TemplateEditor template={mockTemplate} />);
+    
+    // Por padrão abre em Design
+    expect(screen.getByText(/Painel de Ativos/i)).toBeInTheDocument();
+    
+    // Clica na aba Variáveis (usando aria-label ou label do botão)
+    const varTab = screen.getByLabelText(/Variáveis/i);
+    fireEvent.click(varTab);
+    
+    // Verifica se os elementos de variáveis aparecem
+    expect(screen.getByText(/{{Nome_Usina}}/i)).toBeInTheDocument();
+  });
+
+  it('deve inserir blocos com tags de variáveis corretas ao clicar no Painel de Ativos', () => {
+    render(<TemplateEditor template={mockTemplate} />);
+    
+    // Vai para a aba Variáveis
+    fireEvent.click(screen.getByLabelText(/Variáveis/i));
+    
+    // Clica na variável Nome da Usina
+    const varBtn = screen.getByText(/{{Nome_Usina}}/i);
+    fireEvent.click(varBtn);
+    
+    // Verifica se um bloco foi adicionado e se ele contém o texto da variável
+    // (O canvas renderiza o conteúdo do bloco, então agora temos 2 ocorrências: painel e canvas)
+    expect(screen.getAllByText(/{{Nome_Usina}}/i).length).toBeGreaterThanOrEqual(2);
+  });
 });
