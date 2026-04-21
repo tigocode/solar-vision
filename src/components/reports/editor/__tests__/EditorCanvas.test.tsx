@@ -167,6 +167,73 @@ describe('EditorCanvas - Modo de Visualização e Filtros', () => {
     expect(logo).not.toHaveAttribute('crossOrigin');
   });
 
+  it('deve aplicar a cor do texto definida no estilo do bloco', () => {
+    const colorTemplate: Template = {
+      ...mockTemplate,
+      pages: [{
+        id: 'p1',
+        blocks: [{
+          id: 't-1',
+          type: 'text',
+          x: 0, y: 0, width: 200, height: 100,
+          content: 'Test Color',
+          style: { color: '#ef4444' } // Vermelho
+        }]
+      }]
+    };
+
+    render(
+      <EditorCanvas 
+        template={colorTemplate} 
+        currentPageIndex={0} 
+        setCurrentPageIndex={jest.fn()}
+        zoom={100}
+        setZoom={jest.fn()}
+        selectedBlockId={null}
+        setSelectedBlockId={jest.fn()}
+        onUpdateBlockGeometry={jest.fn()}
+        onAddPage={jest.fn()}
+      />
+    );
+    
+    const textElement = screen.getByText('Test Color');
+    // Verificamos se a cor está no estilo aplicado
+    expect(textElement.closest('div')).toHaveStyle({ color: '#ef4444' });
+  });
+
+  it('deve aplicar a família de fonte definida no estilo do bloco', () => {
+    const fontTemplate: Template = {
+      ...mockTemplate,
+      pages: [{
+        id: 'p1',
+        blocks: [{
+          id: 't-1',
+          type: 'text',
+          x: 0, y: 0, width: 200, height: 100,
+          content: 'Test Font',
+          style: { fontFamily: 'Roboto' }
+        }]
+      }]
+    };
+
+    render(
+      <EditorCanvas 
+        template={fontTemplate} 
+        currentPageIndex={0} 
+        setCurrentPageIndex={jest.fn()}
+        zoom={100}
+        setZoom={jest.fn()}
+        selectedBlockId={null}
+        setSelectedBlockId={jest.fn()}
+        onUpdateBlockGeometry={jest.fn()}
+        onAddPage={jest.fn()}
+      />
+    );
+    
+    const textElement = screen.getByText('Test Font');
+    expect(textElement.closest('div')).toHaveStyle({ fontFamily: 'Roboto' });
+  });
+
   it('deve renderizar a tabela sem overflow-auto quando o ajuste de altura ao conteúdo estiver ativo', () => {
     const autoHeightTemplate: Template = {
       ...mockTemplate,

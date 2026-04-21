@@ -3,9 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useBrand } from '@/contexts/BrandContext';
-import { UploadCloud, FileImage, FileJson, CheckCircle2, ChevronRight, Activity, Zap } from 'lucide-react';
+import { UploadCloud, FileImage, FileJson, CheckCircle2, ChevronRight, Activity, Zap, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ProjectStatus, AssetType, SolarPlant } from '@/types/plants';
+import { saveInspection, InspectionRecord } from '@/utils/storage';
+import { v4 as uuidv4 } from 'uuid';
 
 type Step = 'setup' | 'processing' | 'success';
 
@@ -23,6 +26,7 @@ const MOCK_PLANTS: SolarPlant[] = [
 
 export default function NovaInspecaoPage() {
   const { brand } = useBrand();
+  const router = useRouter();
   
   // Controle de Abas
   const [step, setStep] = useState<Step>('setup');
@@ -32,7 +36,23 @@ export default function NovaInspecaoPage() {
   const [operationScope, setOperationScope] = useState(''); // 'ALL' ou o ID da subUnit
   const [inspector, setInspector] = useState('');
   const [date, setDate] = useState('');
-  const [hasFiles, setHasFiles] = useState(false); // Simulação de arquivos arrastados
+  
+  // Dados Técnicos (Novos Campos)
+  const [envTemp, setEnvTemp] = useState('34');
+  const [envWind, setEnvWind] = useState('2.1');
+  const [envClouds, setEnvClouds] = useState('Céu Limpo');
+  const [envIrradiance, setEnvIrradiance] = useState('950');
+
+  const [cameraModel, setCameraModel] = useState('FLIR Vue Pro R 640');
+  const [cameraResolution, setCameraResolution] = useState('640x512px');
+  const [droneModel, setDroneModel] = useState('DJI Matrice 300 RTK');
+  const [calibrationValidUntil, setCalibrationValidUntil] = useState('2024-12-20');
+  const [emissivity, setEmissivity] = useState('0.95');
+  const [reflectedTemp, setReflectedTemp] = useState('20');
+
+  const [technique, setTechnique] = useState('Termografia Passiva');
+  const [viewAngle, setViewAngle] = useState('90');
+  const [standards, setStandards] = useState('ABNT NBR 15572 / ASTM E1213');
 
   // Selected Plant Obj
   const selectedPlant = MOCK_PLANTS.find(p => p.id === selectedPlantId);
@@ -73,7 +93,25 @@ export default function NovaInspecaoPage() {
 
   const handleStartProcessing = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedPlantId || !inspector || !date || !hasFiles) return;
+    if (!selectedPlantId || !inspector || !date) return;
+    
+    // REGISTRO NO LOCAL STORAGE
+    const newInspection: InspectionRecord = {
+      id: `H-NEW-${Math.floor(Math.random() * 1000)}`,
+      unitId: selectedPlantId,
+      unitName: selectedPlant?.name || 'Usina desconhecida',
+      date: new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }),
+      inspector: inspector,
+      status: 'Aguardando Upload',
+      timestamp: Date.now(),
+      technicalData: {
+        envTemp, envWind, envClouds, envIrradiance,
+        cameraModel, cameraResolution, droneModel, calibrationValidUntil, emissivity, reflectedTemp,
+        technique, viewAngle, standards
+      }
+    };
+    
+    saveInspection(newInspection);
     setStep('processing');
   };
 
@@ -96,7 +134,7 @@ export default function NovaInspecaoPage() {
             <UploadCloud className="mr-3 text-primary" size={32} />
             Nova Inspeção Fotovoltaica
           </h1>
-          <p className="text-slate-500 font-medium italic">Faça o upload do pacote de imagens do drone para diagnóstico IA.</p>
+          <p className="text-slate-500 font-medium italic">Preencha os dados técnicos da operação para o relatório normativo.</p>
         </div>
 
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden p-8 md:p-12 min-h-[500px] flex flex-col justify-center">
@@ -107,8 +145,9 @@ export default function NovaInspecaoPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className={`space-y-2 ${isComplex ? 'lg:col-span-2' : 'lg:col-span-1'}`}>
-                  <label className="text-sm font-bold text-slate-700">Seleção de Ativo (Usina)</label>
+                  <label htmlFor="plant-select" className="text-sm font-bold text-slate-700">Seleção de Ativo (Usina)</label>
                   <select 
+                    id="plant-select"
                     required 
                     value={selectedPlantId} onChange={(e) => setSelectedPlantId(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium appearance-none cursor-pointer"
@@ -123,8 +162,9 @@ export default function NovaInspecaoPage() {
                 {/* Aparece atrelado apenas se a Usina for do tipo Complexo */}
                 {isComplex && (
                   <div className="space-y-2 lg:col-span-2 animate-in fade-in slide-in-from-top-4 duration-300">
-                     <label className="text-sm font-bold text-slate-700">Escopo da Operação no Complexo</label>
+                     <label htmlFor="operation-scope" className="text-sm font-bold text-slate-700">Escopo da Operação no Complexo</label>
                      <select 
+                       id="operation-scope"
                        value={operationScope} onChange={(e) => setOperationScope(e.target.value)}
                        className="w-full px-4 py-3 bg-indigo-50/50 border border-indigo-100 rounded-xl text-indigo-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-bold appearance-none cursor-pointer"
                      >
@@ -137,16 +177,18 @@ export default function NovaInspecaoPage() {
                 )}
                 
                 <div className={`${isComplex ? 'lg:col-span-2' : 'lg:col-span-1'} space-y-2`}>
-                  <label className="text-sm font-bold text-slate-700">Data da Inspeção</label>
+                  <label htmlFor="inspection-date" className="text-sm font-bold text-slate-700">Data da Inspeção</label>
                   <input 
+                    id="inspection-date"
                     type="date" required 
                     value={date} onChange={(e) => setDate(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
                   />
                 </div>
                 <div className={`${isComplex ? 'lg:col-span-2' : 'lg:col-span-2'} space-y-2`}>
-                  <label className="text-sm font-bold text-slate-700">Responsável Técnico</label>
+                  <label htmlFor="inspector-name" className="text-sm font-bold text-slate-700">Responsável Técnico</label>
                   <input 
+                    id="inspector-name"
                     type="text" required 
                     value={inspector} onChange={(e) => setInspector(e.target.value)}
                     placeholder="Nome do Piloto/Engenheiro"
@@ -167,44 +209,92 @@ export default function NovaInspecaoPage() {
                  </div>
               )}
 
-              {/* DROPZONE AREA */}
-              <div className="space-y-3">
-                <label className="text-sm font-bold text-slate-700">Pacote de Dados (RGB/IR + Metadados)</label>
+              {/* SEÇÕES TÉCNICAS */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-4 border-t border-slate-100">
                 
-                <button 
-                  type="button"
-                  data-testid="mock-dropzone-click"
-                  onClick={() => setHasFiles(!hasFiles)}
-                  className={`w-full h-64 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all bg-slate-50 group hover:border-primary hover:bg-primary/5
-                    ${hasFiles ? 'border-primary bg-primary/5 ' : 'border-slate-300'}`
-                  }
-                >
-                  <div className={`p-4 rounded-full mb-4 shadow-sm transition-transform group-hover:scale-110 ${hasFiles ? 'bg-primary text-white' : 'bg-white text-slate-400'}`}>
-                     <UploadCloud size={32} />
-                  </div>
-                  
-                  <h3 className={`font-black tracking-tight text-lg mb-1 ${hasFiles ? 'text-primary' : 'text-slate-600'}`}>
-                    {hasFiles ? 'Pacote Anexado com Sucesso!' : 'Clique ou araste seus arquivos aqui'}
+                {/* AMBIENTE */}
+                <div className="space-y-6">
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center border-b border-slate-100 pb-2">
+                    <Activity size={16} className="mr-2 text-primary" /> Condições Ambientais
                   </h3>
-                  
-                  {!hasFiles ? (
-                    <p className="text-slate-500 text-sm font-medium">Arquivos suportados: .jpg (Radiométricos), .tif, info.json, .csv</p>
-                  ) : (
-                    <div className="flex space-x-4 mt-4 text-emerald-600">
-                      <span className="flex items-center text-xs font-bold bg-emerald-50 px-2 py-1 rounded"><FileImage size={14} className="mr-1" /> 1,420 Imagens</span>
-                      <span className="flex items-center text-xs font-bold bg-emerald-50 px-2 py-1 rounded"><FileJson size={14} className="mr-1" /> Telemetria OK</span>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label htmlFor="env-temp" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Temperatura (°C)</label>
+                      <input id="env-temp" type="number" required value={envTemp} onChange={(e) => setEnvTemp(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold" />
                     </div>
-                  )}
-                </button>
+                    <div className="space-y-2">
+                      <label htmlFor="env-wind" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Vento (m/s)</label>
+                      <input id="env-wind" type="text" required value={envWind} onChange={(e) => setEnvWind(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold" />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="env-clouds" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nuvens (Céu)</label>
+                      <input id="env-clouds" type="text" required value={envClouds} onChange={(e) => setEnvClouds(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold" />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="env-irrad" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Irradiância (W/m²)</label>
+                      <input id="env-irrad" type="number" value={envIrradiance} onChange={(e) => setEnvIrradiance(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* EQUIPAMENTOS */}
+                <div className="space-y-6">
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center border-b border-slate-100 pb-2">
+                    <Zap size={16} className="mr-2 text-primary" /> Equipamentos Utilizados
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label htmlFor="drone-model" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Drone</label>
+                        <input id="drone-model" type="text" required value={droneModel} onChange={(e) => setDroneModel(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold" />
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="camera-model" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Câmera</label>
+                        <input id="camera-model" type="text" required value={cameraModel} onChange={(e) => setCameraModel(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label htmlFor="cam-res" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Resolução</label>
+                        <input id="cam-res" type="text" required value={cameraResolution} onChange={(e) => setCameraResolution(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold" />
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="calib-valid" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Validade Calibração</label>
+                        <input id="calib-valid" type="date" required value={calibrationValidUntil} onChange={(e) => setCalibrationValidUntil(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* PROCEDIMENTO */}
+                <div className="md:col-span-2 space-y-6">
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center border-b border-slate-100 pb-2">
+                    <ClipboardList size={16} className="mr-2 text-primary" /> Procedimento de Inspeção
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <label htmlFor="proc-tech" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Técnica Aplicada</label>
+                      <input id="proc-tech" type="text" required value={technique} onChange={(e) => setTechnique(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold" />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="view-angle" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ângulo de Visão</label>
+                      <input id="view-angle" type="text" required value={viewAngle} onChange={(e) => setViewAngle(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold" />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="applied-norms" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Normas Aplicadas</label>
+                      <input id="applied-norms" type="text" required value={standards} onChange={(e) => setStandards(e.target.value)} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold" />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="pt-4 flex justify-end">
+              <div className="pt-8 flex justify-end border-t border-slate-100">
                 <button
                   type="submit"
-                  disabled={!hasFiles || !selectedPlantId || !inspector || !date}
+                  disabled={!selectedPlantId || !inspector || !date || !envTemp || !envWind || !envClouds || !cameraModel || !droneModel || !technique}
                   className="px-8 py-4 bg-primary text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:opacity-90 transition-all disabled:opacity-50 disabled:shadow-none flex items-center"
                 >
-                  Iniciar Processamento <ChevronRight className="ml-2" size={18} />
+                  Registrar Inspeção <ChevronRight className="ml-2" size={18} />
                 </button>
               </div>
             </form>
@@ -252,13 +342,19 @@ export default function NovaInspecaoPage() {
                  O processamento da usina <strong className="text-slate-700">{selectedPlant?.name || 'Local'}</strong> foi finalizado com sucesso. Nossa inteligência artificial mapeou os módulos e classificou as anomalias detectadas.
                </p>
 
-               <div className="pt-8">
+               <div className="pt-8 flex gap-4">
+                 <Link 
+                   href="/dashboard/upload"
+                   className="px-8 py-4 bg-slate-900 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-slate-800 transition-all inline-flex items-center"
+                 >
+                   Fazer Upload das Imagens <ChevronRight className="ml-2" size={18} />
+                 </Link>
                  <Link 
                    href="/dashboard/diagnostico"
                    className="px-8 py-4 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg hover:opacity-90 transition-all inline-flex items-center"
                    style={{ backgroundColor: brand.primaryColor, boxShadow: `0 10px 15px -3px ${brand.primaryColor}40` }}
                  >
-                   Ver Diagnóstico da Usina <ChevronRight className="ml-2" size={18} />
+                   Ir para Diagnóstico <ChevronRight className="ml-2" size={18} />
                  </Link>
                </div>
             </div>

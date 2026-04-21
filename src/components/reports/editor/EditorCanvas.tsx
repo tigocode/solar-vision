@@ -20,6 +20,7 @@ interface EditorCanvasProps {
   isPreview?: boolean;
   hideUI?: boolean;
   anomalies?: any[];
+  dynamicMetadata?: Record<string, string>;
 }
 
 export default function EditorCanvas({ 
@@ -35,7 +36,8 @@ export default function EditorCanvas({
   brandLogo,
   isPreview = false,
   hideUI = false,
-  anomalies = []
+  anomalies = [],
+  dynamicMetadata
 }: EditorCanvasProps) {
   
   const handleCanvasClick = () => {
@@ -79,13 +81,15 @@ export default function EditorCanvas({
             fontSize: block.style?.fontSize || '12px',
             fontWeight: block.style?.fontWeight || 'normal',
             fontStyle: block.style?.italic ? 'italic' : 'normal',
-            lineHeight: block.style?.lineHeight || '1.5'
+            lineHeight: block.style?.lineHeight || '1.5',
+            color: block.style?.color,
+            fontFamily: block.style?.fontFamily
           }}>
-            <p className="text-slate-800">
+            <div className="w-full h-full">
               {isPreview || hideUI
-                ? replacePlaceholders(block.content || '', MOCK_REPORT_DATA) 
+                ? replacePlaceholders(block.content || '', dynamicMetadata || MOCK_REPORT_DATA) 
                 : (block.content || 'Digite seu texto...')}
-            </p>
+            </div>
           </div>
         );
       case 'table':

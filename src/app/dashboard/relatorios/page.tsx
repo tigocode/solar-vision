@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import ReportSummaryCards from '@/components/reports/ReportSummaryCards';
 import ValidatedAnomaliesTable from '@/components/reports/ValidatedAnomaliesTable';
@@ -11,9 +12,10 @@ import { useReactToPrint } from 'react-to-print';
 
 import { mockTemplates } from '@/services/mocks/templates';
 import EditorCanvas from '@/components/reports/editor/EditorCanvas';
+import { getStoredInspections } from '@/utils/storage';
 
 // Mocks consolidados para o Painel de Relatórios
-const reportAnomalies: Anomaly[] = [
+const defaultAnomalies: Anomaly[] = [
   {
     id: 'VAL-01',
     type: 'Módulo Trincado',
@@ -50,11 +52,80 @@ const reportAnomalies: Anomaly[] = [
 ];
 
 function ReportsContent() {
+  const searchParams = useSearchParams();
+  const inspectionId = searchParams.get('id');
+  
   const componentRef = React.useRef<HTMLDivElement>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState(mockTemplates[0].id);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   
+  // Dados dinâmicos baseados na ID da inspeção
+  const [reportData, setReportData] = useState<{
+    unitName: string;
+    healthScore: number;
+    anomalies: Anomaly[];
+    metadata: Record<string, string>;
+  }>({
+    unitName: 'Snapshot Geral',
+    healthScore: 98.4,
+    anomalies: defaultAnomalies,
+    metadata: {}
+  });
+
+  useEffect(() => {
+    if (inspectionId) {
+      // Tenta buscar no storage local ou nos registros conhecidos
+      const allInspec = getStoredInspections();
+      const match = allInspec.find(i => i.id === inspectionId);
+      
+      if (match) {
+        // Simulação de anomalias específicas
+        let specAnomalies = [...defaultAnomalies];
+        if (inspectionId === 'H-002') {
+           specAnomalies = Array(8).fill(null).map((_, idx) => ({
+             ...defaultAnomalies[0],
+             id: `VAL-B${idx}`,
+             severity: idx < 3 ? 'Crítico' : 'Médio'
+           }));
+        } else if (inspectionId === 'H-004') {
+           specAnomalies = [defaultAnomalies[1]];
+        }
+
+        // Mapeamento de variáveis dinâmicas para o Editor
+        const dynamicMetadata: Record<string, string> = {
+          '{{Nome_Usina}}': match.unitName,
+          '{{Data_Inspecao}}': match.date,
+          '{{Tecnico_Responsavel}}': match.inspector,
+          '{{Cliente}}': 'Solar Vision Asset Management',
+          '{{Capacidade_MWp}}': '5.2 MWp',
+          '{{Total_Anomalias}}': String(specAnomalies.length),
+        };
+
+        if (match.technicalData) {
+          Object.assign(dynamicMetadata, {
+            '{{Irradiancia}}': String(match.technicalData.envIrradiance || '950'),
+            '{{Temp_Amb}}': String(match.technicalData.envTemp),
+            '{{Vento}}': String(match.technicalData.envWind),
+            '{{Cobertura_Nuvens}}': match.technicalData.envClouds,
+            '{{Camera_Model}}': match.technicalData.cameraModel,
+            '{{Camera_Res}}': match.technicalData.cameraResolution,
+            '{{Drone_Model}}': match.technicalData.droneModel,
+            '{{Data_Calibracao}}': match.technicalData.calibrationValidUntil,
+          });
+        }
+
+        setReportData({
+          unitName: match.unitName,
+          healthScore: match.healthScore || 98.4,
+          anomalies: specAnomalies,
+          metadata: dynamicMetadata
+        });
+      }
+    }
+  }, [inspectionId]);
+
   const selectedTemplate = mockTemplates.find(t => t.id === selectedTemplateId) || mockTemplates[0];
+  const reportAnomalies = reportData.anomalies;
 
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
@@ -168,10 +239,10 @@ function ReportsContent() {
               <div className="space-y-2">
                 <div className="flex justify-between items-end">
                    <span className="text-[10px] font-bold text-slate-400 uppercase">Saúde Operacional</span>
-                   <span className="text-lg font-black text-slate-800 tracking-tighter italic">98.4%</span>
+                   <span className="text-lg font-black text-slate-800 tracking-tighter italic">{reportData.healthScore}%</span>
                 </div>
                 <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-green-500 to-indigo-600 w-[98.4%] rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]"></div>
+                  <div className="h-full bg-gradient-to-r from-green-500 to-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]" style={{ width: `${reportData.healthScore}%` }}></div>
                 </div>
               </div>
             </div>
@@ -215,6 +286,7 @@ function ReportsContent() {
                         isPreview={true}
                         hideUI={true}
                         anomalies={reportAnomalies}
+                        dynamicMetadata={reportData.metadata}
                       />
                    </div>
                  ))}
@@ -264,6 +336,7 @@ function ReportsContent() {
                     isPreview={true}
                     hideUI={true}
                     anomalies={reportAnomalies}
+                    dynamicMetadata={reportData.metadata}
                  />
                </div>
              ))}

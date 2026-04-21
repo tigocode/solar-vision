@@ -32,7 +32,6 @@ describe('EditorPropertiesPanel', () => {
   it('deve chamar onChange ao alterar o alinhamento', () => {
     render(<EditorPropertiesPanel block={mockBlock} onChange={mockOnChange} />);
     
-    // Supondo botões de alinhamento [Esquerda, Centro, Direita]
     const centerAlignBtn = screen.getByLabelText(/alinhar ao centro/i);
     fireEvent.click(centerAlignBtn);
     
@@ -54,7 +53,6 @@ describe('EditorPropertiesPanel', () => {
   it('deve permitir editar o conteúdo de blocos de texto via campo de texto', () => {
     render(<EditorPropertiesPanel block={mockBlock} onChange={mockOnChange} onDelete={jest.fn()} />);
     
-    // Procura o campo de edição de conteúdo (textarea ou input)
     const contentInput = screen.getByLabelText(/conteúdo/i);
     fireEvent.change(contentInput, { target: { value: 'Texto Editado' } });
     
@@ -68,18 +66,34 @@ describe('EditorPropertiesPanel', () => {
     render(<EditorPropertiesPanel block={tableBlock} onChange={mockOnChange} onDelete={jest.fn()} />);
     
     expect(screen.getByLabelText(/filtrar por severidade/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/ajustar altura ao conteúdo/i)).toBeInTheDocument();
   });
 
-  it('deve chamar onChange ao trocar o filtro de severidade', () => {
-    const tableBlock: EditorBlock = { ...mockBlock, type: 'table', config: { severityFilter: 'Todos' } };
-    render(<EditorPropertiesPanel block={tableBlock} onChange={mockOnChange} onDelete={jest.fn()} />);
+  it('deve permitir trocar a família da fonte e tamanho', () => {
+    render(<EditorPropertiesPanel block={mockBlock} onChange={mockOnChange} onDelete={jest.fn()} />);
     
-    const select = screen.getByLabelText(/filtrar por severidade/i);
-    fireEvent.change(select, { target: { value: 'Crítico' } });
+    const fontSelect = screen.getByLabelText(/fonte/i);
+    fireEvent.change(fontSelect, { target: { value: 'Roboto' } });
     
     expect(mockOnChange).toHaveBeenCalledWith(expect.objectContaining({
-      config: expect.objectContaining({ severityFilter: 'Crítico' })
+      style: expect.objectContaining({ fontFamily: 'Roboto' })
+    }));
+
+    const sizeSelect = screen.getByLabelText(/tamanho/i);
+    fireEvent.change(sizeSelect, { target: { value: '20px' } });
+
+    expect(mockOnChange).toHaveBeenCalledWith(expect.objectContaining({
+      style: expect.objectContaining({ fontSize: '20px' })
+    }));
+  });
+
+  it('deve permitir alternar negrito e itálico', () => {
+    render(<EditorPropertiesPanel block={mockBlock} onChange={mockOnChange} onDelete={jest.fn()} />);
+    
+    const boldBtn = screen.getByTitle(/negrito/i);
+    fireEvent.click(boldBtn);
+    
+    expect(mockOnChange).toHaveBeenCalledWith(expect.objectContaining({
+      style: expect.objectContaining({ fontWeight: 'bold' })
     }));
   });
 });

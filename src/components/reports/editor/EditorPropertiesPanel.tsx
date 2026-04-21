@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, AlignLeft, AlignCenter, AlignRight, Palette, Trash2, Settings, Type } from 'lucide-react';
+import { X, AlignLeft, AlignCenter, AlignRight, Palette, Trash2, Settings, Type, Bold, Italic } from 'lucide-react';
 import { EditorBlock } from '@/types/templates';
 
 interface EditorPropertiesPanelProps {
@@ -65,10 +65,63 @@ export default function EditorPropertiesPanel({ block, onChange, onDelete, onClo
               id="content-editor"
               value={block.content || ''}
               onChange={(e) => handleContentChange(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 min-h-[100px] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all resize-none"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all resize-none mb-4"
               placeholder="Digite o texto aqui..."
               aria-label="Conteúdo"
             />
+
+            {/* Typography Controls */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="font-family" className="text-[10px] font-black text-slate-400 mb-1.5 block uppercase tracking-tighter">Fonte</label>
+                <select 
+                  id="font-family"
+                  value={block.style?.fontFamily || 'Inter'}
+                  onChange={(e) => handleStyleChange({ fontFamily: e.target.value })}
+                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 focus:outline-none focus:border-amber-500 transition-all text-slate-700 overflow-hidden"
+                >
+                  <optgroup label="Solar Vision">
+                    <option value="Inter">Inter</option>
+                    <option value="Roboto">Roboto</option>
+                  </optgroup>
+                  <optgroup label="Sistemas">
+                    <option value="sans-serif">Sans-Serif</option>
+                    <option value="serif">Serif</option>
+                    <option value="monospace">Monospace</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="font-size" className="text-[10px] font-black text-slate-400 mb-1.5 block uppercase tracking-tighter">Tamanho</label>
+                <select 
+                  id="font-size"
+                  value={block.style?.fontSize || '12px'}
+                  onChange={(e) => handleStyleChange({ fontSize: e.target.value })}
+                  className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-bold bg-slate-50 focus:outline-none focus:border-amber-500 transition-all text-slate-700"
+                >
+                  {['8px', '9px', '10px', '12px', '14px', '16px', '20px', '24px', '32px', '48px'].map(size => (
+                    <option key={size} value={size}>{size}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex space-x-2 mt-3">
+               <button 
+                 onClick={() => handleStyleChange({ fontWeight: block.style?.fontWeight === 'bold' ? 'normal' : 'bold' })}
+                 className={`flex-1 py-1.5 flex justify-center rounded-lg border transition-all ${block.style?.fontWeight === 'bold' ? 'bg-amber-500 border-amber-600 text-white' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                 title="Negrito"
+               >
+                 <Bold size={14} />
+               </button>
+               <button 
+                 onClick={() => handleStyleChange({ italic: !block.style?.italic })}
+                 className={`flex-1 py-1.5 flex justify-center rounded-lg border transition-all ${block.style?.italic ? 'bg-amber-500 border-amber-600 text-white' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                 title="Itálico"
+               >
+                 <Italic size={14} />
+               </button>
+            </div>
           </div>
         )}
 
