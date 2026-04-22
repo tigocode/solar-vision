@@ -14,26 +14,26 @@ const LoginPage = () => {
   const handleLogin = (credentials: LoginCredentials) => {
     setErrorLogin(null);
     const users = getStoredUsers();
-    
+
     // Fallback de administrador padrão em caso de ambiente vazio
     if (credentials.email === 'admin@solarvision.com') {
-       localStorage.setItem('solarvision-viewmode', 'operator');
-       router.push('/dashboard');
-       return;
+      localStorage.setItem('solarvision-viewmode', 'operator');
+      router.push('/dashboard');
+      return;
     }
 
     const matchedUser = users.find(u => u.email.toLowerCase() === credentials.email.toLowerCase());
-    
+
     if (matchedUser) {
-      if (credentials.password.length < 3) {
+      if (!credentials.password || credentials.password.length < 3) {
         setErrorLogin('Senha inválida.');
         return;
       }
-      
+
       const viewMode = matchedUser.role === 'CLIENT' ? 'client' : 'operator';
       localStorage.setItem('solarvision-viewmode', viewMode);
       localStorage.setItem('solarvision-user', JSON.stringify(matchedUser));
-      
+
       router.push('/dashboard');
     } else {
       setErrorLogin('Usuário não encontrado. Use o e-mail cadastrado ou admin@solarvision.com');
@@ -42,13 +42,13 @@ const LoginPage = () => {
 
   return (
     <main className="min-h-screen flex flex-col md:flex-row bg-slate-900 font-sans">
-      
+
       {/* Lado Esquerdo: Branding & Mensagem */}
       <section className="hidden md:flex md:w-1/2 flex-col justify-between p-12 relative overflow-hidden">
         {/* Background Decorative Gradient */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[100px] -mr-64 -mt-64"></div>
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-[100px] -ml-64 -mb-64"></div>
-        
+
         <Logo iconSize={32} textSize="text-2xl" />
 
         <div className="relative z-10">
@@ -98,7 +98,7 @@ const LoginPage = () => {
             Não tem acesso? <a href="#" className="text-amber-600 font-bold hover:text-amber-700 transition-colors">Contacte o suporte</a>
           </p>
         </div>
-        
+
         {/* Footer info limited to login side */}
         <div className="absolute bottom-6 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
           Solar Vision © 2026 • Powered by Codenu
