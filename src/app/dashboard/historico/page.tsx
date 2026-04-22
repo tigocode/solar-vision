@@ -158,7 +158,7 @@ export default function HistoricoPage() {
             <div className="relative pl-8 md:pl-12 space-y-8 pb-12 before:absolute before:inset-0 before:ml-[5px] md:before:ml-[21px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-slate-200 before:to-transparent">
 
               {filteredRecords.map((record, index) => (
-                <div key={record.id} className="relative flex items-center justify-center animate-in fade-in slide-in-from-bottom-8 duration-700" style={{ animationDelay: `${index * 150}ms`, fillMode: 'both' }}>
+                <div key={record.id} className="relative flex items-center justify-center animate-in fade-in slide-in-from-bottom-8 duration-700" style={{ animationDelay: `${index * 150}ms`, animationFillMode: 'both' }}>
 
                   {/* ANCORA DA TIMELINE (DOT CIRCULAR) */}
                   <div className={`absolute left-[-31px] md:left-[-47px] mt-1.5 w-4 h-4 rounded-full border-4 border-white shadow-sm ring-2 ring-slate-200 ${record.status === 'Concluída' ? 'bg-indigo-500' : 'bg-amber-500 animate-pulse'}`}
