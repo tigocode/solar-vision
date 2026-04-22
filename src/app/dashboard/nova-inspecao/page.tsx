@@ -14,12 +14,12 @@ type Step = 'setup' | 'processing' | 'success';
 
 // mock de dados refletindo o novo Schema
 const MOCK_PLANTS: SolarPlant[] = [
-  { id: 'p1', name: 'UFV Alpha', type: 'UFV', capacityKWp: 5.2, location: '', status: ProjectStatus.OPERACAO_E_MANUTENCAO, createdAt: '', updatedAt: '' },
-  { 
-    id: 'p2', name: 'Complexo Pirapora', type: 'COMPLEXO', capacityKWp: 15.0, location: '', status: ProjectStatus.OPERACAO_E_MANUTENCAO, createdAt: '', updatedAt: '',
+  { id: 'p1', name: 'UFV Alpha', type: 'UFV', capacityKWp: 5.2, location: '', status: ProjectStatus.FASE_RELATORIO, createdAt: '', updatedAt: '' },
+  {
+    id: 'p2', name: 'Complexo Pirapora', type: 'COMPLEXO', capacityKWp: 15.0, location: '', status: ProjectStatus.FASE_RELATORIO, createdAt: '', updatedAt: '',
     subUnits: [
-      { id: 'p2_sub1', name: 'UFV Pirapora I', capacityKWp: 5.0, type: 'UFV', location: '', status: ProjectStatus.OPERACAO_E_MANUTENCAO, createdAt: '', updatedAt: '' },
-      { id: 'p2_sub2', name: 'UFV Pirapora II', capacityKWp: 10.0, type: 'UFV', location: '', status: ProjectStatus.OPERACAO_E_MANUTENCAO, createdAt: '', updatedAt: '' }
+      { id: 'p2_sub1', name: 'UFV Pirapora I', capacityKWp: 5.0, type: 'UFV', location: '', status: ProjectStatus.FASE_RELATORIO, createdAt: '', updatedAt: '' },
+      { id: 'p2_sub2', name: 'UFV Pirapora II', capacityKWp: 10.0, type: 'UFV', location: '', status: ProjectStatus.FASE_RELATORIO, createdAt: '', updatedAt: '' }
     ]
   }
 ];
@@ -27,16 +27,16 @@ const MOCK_PLANTS: SolarPlant[] = [
 export default function NovaInspecaoPage() {
   const { brand } = useBrand();
   const router = useRouter();
-  
+
   // Controle de Abas
   const [step, setStep] = useState<Step>('setup');
-  
+
   // Dados do Formulário (Setup)
   const [selectedPlantId, setSelectedPlantId] = useState('');
   const [operationScope, setOperationScope] = useState(''); // 'ALL' ou o ID da subUnit
   const [inspector, setInspector] = useState('');
   const [date, setDate] = useState('');
-  
+
   // Dados Técnicos (Novos Campos)
   const [envTemp, setEnvTemp] = useState('34');
   const [envWind, setEnvWind] = useState('2.1');
@@ -75,7 +75,7 @@ export default function NovaInspecaoPage() {
 
           if (next >= 100) {
             clearInterval(interval);
-            setTimeout(() => setStep('success'), 400); 
+            setTimeout(() => setStep('success'), 400);
             return 100;
           }
           return next;
@@ -88,13 +88,13 @@ export default function NovaInspecaoPage() {
 
   // Esvazia as dependencias cascata se mudar de "planta mãe"
   useEffect(() => {
-     setOperationScope('ALL');
+    setOperationScope('ALL');
   }, [selectedPlantId]);
 
   const handleStartProcessing = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlantId || !inspector || !date) return;
-    
+
     // REGISTRO NO LOCAL STORAGE
     const newInspection: InspectionRecord = {
       id: `H-NEW-${Math.floor(Math.random() * 1000)}`,
@@ -110,24 +110,24 @@ export default function NovaInspecaoPage() {
         technique, viewAngle, standards
       }
     };
-    
+
     saveInspection(newInspection);
     setStep('processing');
   };
 
   const getTargetCapacity = () => {
-     if (!selectedPlant) return null;
-     if (isComplex && operationScope !== 'ALL') {
-        const sub = selectedPlant.subUnits?.find(s => s.id === operationScope);
-        return sub ? sub.capacityKWp : 0;
-     }
-     return selectedPlant.capacityKWp;
+    if (!selectedPlant) return null;
+    if (isComplex && operationScope !== 'ALL') {
+      const sub = selectedPlant.subUnits?.find(s => s.id === operationScope);
+      return sub ? sub.capacityKWp : 0;
+    }
+    return selectedPlant.capacityKWp;
   };
 
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto w-full space-y-8 animate-in fade-in duration-700">
-        
+
         {/* HEADER GENÉRICO */}
         <div className="space-y-1">
           <h1 className="text-3xl font-black text-slate-800 tracking-tight flex items-center">
@@ -142,19 +142,19 @@ export default function NovaInspecaoPage() {
           {/* FASE 1: CONFIGURAÇÃO E UPLOAD */}
           {step === 'setup' && (
             <form onSubmit={handleStartProcessing} className="space-y-10 animate-in fade-in zoom-in-95 duration-500">
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className={`space-y-2 ${isComplex ? 'lg:col-span-2' : 'lg:col-span-1'}`}>
                   <label htmlFor="plant-select" className="text-sm font-bold text-slate-700">Seleção de Ativo (Usina)</label>
-                  <select 
+                  <select
                     id="plant-select"
-                    required 
+                    required
                     value={selectedPlantId} onChange={(e) => setSelectedPlantId(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium appearance-none cursor-pointer"
                   >
                     <option value="" disabled>Selecione um ativo da base...</option>
                     {MOCK_PLANTS.map(p => (
-                       <option key={p.id} value={p.id}>{p.name} ({p.type})</option>
+                      <option key={p.id} value={p.id}>{p.name} ({p.type})</option>
                     ))}
                   </select>
                 </div>
@@ -162,34 +162,34 @@ export default function NovaInspecaoPage() {
                 {/* Aparece atrelado apenas se a Usina for do tipo Complexo */}
                 {isComplex && (
                   <div className="space-y-2 lg:col-span-2 animate-in fade-in slide-in-from-top-4 duration-300">
-                     <label htmlFor="operation-scope" className="text-sm font-bold text-slate-700">Escopo da Operação no Complexo</label>
-                     <select 
-                       id="operation-scope"
-                       value={operationScope} onChange={(e) => setOperationScope(e.target.value)}
-                       className="w-full px-4 py-3 bg-indigo-50/50 border border-indigo-100 rounded-xl text-indigo-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-bold appearance-none cursor-pointer"
-                     >
-                       <option value="ALL">Complexo Consolidado Inteiro</option>
-                       {selectedPlant?.subUnits?.map(sub => (
-                          <option key={sub.id} value={sub.id}>Inspecionar apenas {sub.name}</option>
-                       ))}
-                     </select>
+                    <label htmlFor="operation-scope" className="text-sm font-bold text-slate-700">Escopo da Operação no Complexo</label>
+                    <select
+                      id="operation-scope"
+                      value={operationScope} onChange={(e) => setOperationScope(e.target.value)}
+                      className="w-full px-4 py-3 bg-indigo-50/50 border border-indigo-100 rounded-xl text-indigo-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-bold appearance-none cursor-pointer"
+                    >
+                      <option value="ALL">Complexo Consolidado Inteiro</option>
+                      {selectedPlant?.subUnits?.map(sub => (
+                        <option key={sub.id} value={sub.id}>Inspecionar apenas {sub.name}</option>
+                      ))}
+                    </select>
                   </div>
                 )}
-                
+
                 <div className={`${isComplex ? 'lg:col-span-2' : 'lg:col-span-1'} space-y-2`}>
                   <label htmlFor="inspection-date" className="text-sm font-bold text-slate-700">Data da Inspeção</label>
-                  <input 
+                  <input
                     id="inspection-date"
-                    type="date" required 
+                    type="date" required
                     value={date} onChange={(e) => setDate(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
                   />
                 </div>
                 <div className={`${isComplex ? 'lg:col-span-2' : 'lg:col-span-2'} space-y-2`}>
                   <label htmlFor="inspector-name" className="text-sm font-bold text-slate-700">Responsável Técnico</label>
-                  <input 
+                  <input
                     id="inspector-name"
-                    type="text" required 
+                    type="text" required
                     value={inspector} onChange={(e) => setInspector(e.target.value)}
                     placeholder="Nome do Piloto/Engenheiro"
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
@@ -199,19 +199,19 @@ export default function NovaInspecaoPage() {
 
               {/* BARRA DE METADADOS EXTRAIDA AUTOMATICAMENTE DA RELAÇÃO */}
               {selectedPlant && (
-                 <div className="bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl flex items-center justify-between text-sm animate-in fade-in duration-300">
-                   <span className="font-bold text-slate-500">Métricas Recuperadas:</span>
-                   <div className="flex gap-4 font-black text-slate-800">
-                      <span className="flex items-center"><Zap size={14} className="mr-1 text-slate-400" /> {getTargetCapacity()} MWp Vinculados</span>
-                      <span className="text-slate-300">|</span>
-                      <span>{operationScope === 'ALL' ? 'Workflow Geral' : 'Workflow Individual Restrito'}</span>
-                   </div>
-                 </div>
+                <div className="bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl flex items-center justify-between text-sm animate-in fade-in duration-300">
+                  <span className="font-bold text-slate-500">Métricas Recuperadas:</span>
+                  <div className="flex gap-4 font-black text-slate-800">
+                    <span className="flex items-center"><Zap size={14} className="mr-1 text-slate-400" /> {getTargetCapacity()} MWp Vinculados</span>
+                    <span className="text-slate-300">|</span>
+                    <span>{operationScope === 'ALL' ? 'Workflow Geral' : 'Workflow Individual Restrito'}</span>
+                  </div>
+                </div>
               )}
 
               {/* SEÇÕES TÉCNICAS */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-4 border-t border-slate-100">
-                
+
                 {/* AMBIENTE */}
                 <div className="space-y-6">
                   <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center border-b border-slate-100 pb-2">
@@ -306,21 +306,21 @@ export default function NovaInspecaoPage() {
               <div className="relative">
                 {/* Loader Circular Simples */}
                 <div className="w-24 h-24 border-4 border-slate-100 rounded-full flex items-center justify-center relative overflow-hidden">
-                   <div 
-                     className="absolute bottom-0 left-0 right-0 bg-primary/20 transition-all duration-100" 
-                     style={{ height: `${progress}%` }} 
-                   />
-                   <Activity size={32} className="text-primary animate-pulse relative z-10" />
+                  <div
+                    className="absolute bottom-0 left-0 right-0 bg-primary/20 transition-all duration-100"
+                    style={{ height: `${progress}%` }}
+                  />
+                  <Activity size={32} className="text-primary animate-pulse relative z-10" />
                 </div>
               </div>
 
               <div className="text-center space-y-2 w-full max-w-sm">
                 <h2 className="text-2xl font-black text-slate-800 tracking-tight">Processando Dados</h2>
                 <p className="text-slate-500 font-medium h-6 text-sm">{statusMessage}</p>
-                
+
                 {/* Linha de Progresso Contínua */}
                 <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-4">
-                  <div 
+                  <div
                     className="h-full bg-primary transition-all duration-75 ease-linear"
                     style={{ width: `${progress}%`, backgroundColor: brand.primaryColor }}
                   />
@@ -333,30 +333,30 @@ export default function NovaInspecaoPage() {
           {/* FASE 3: SUCESSO */}
           {step === 'success' && (
             <div className="flex flex-col items-center justify-center space-y-6 text-center animate-in zoom-in-95 duration-500 py-12">
-               <div className="w-24 h-24 rounded-full flex items-center justify-center mb-4 animate-bounce" style={{ backgroundColor: brand.primaryColor }}>
-                 <CheckCircle2 size={48} className="text-white" />
-               </div>
-               
-               <h2 className="text-3xl font-black text-slate-800 tracking-tight">Inspeção Concluída!</h2>
-               <p className="text-slate-500 font-medium max-w-md">
-                 O processamento da usina <strong className="text-slate-700">{selectedPlant?.name || 'Local'}</strong> foi finalizado com sucesso. Nossa inteligência artificial mapeou os módulos e classificou as anomalias detectadas.
-               </p>
+              <div className="w-24 h-24 rounded-full flex items-center justify-center mb-4 animate-bounce" style={{ backgroundColor: brand.primaryColor }}>
+                <CheckCircle2 size={48} className="text-white" />
+              </div>
 
-               <div className="pt-8 flex gap-4">
-                 <Link 
-                   href="/dashboard/upload"
-                   className="px-8 py-4 bg-slate-900 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-slate-800 transition-all inline-flex items-center"
-                 >
-                   Fazer Upload das Imagens <ChevronRight className="ml-2" size={18} />
-                 </Link>
-                 <Link 
-                   href="/dashboard/diagnostico"
-                   className="px-8 py-4 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg hover:opacity-90 transition-all inline-flex items-center"
-                   style={{ backgroundColor: brand.primaryColor, boxShadow: `0 10px 15px -3px ${brand.primaryColor}40` }}
-                 >
-                   Ir para Diagnóstico <ChevronRight className="ml-2" size={18} />
-                 </Link>
-               </div>
+              <h2 className="text-3xl font-black text-slate-800 tracking-tight">Inspeção Concluída!</h2>
+              <p className="text-slate-500 font-medium max-w-md">
+                O processamento da usina <strong className="text-slate-700">{selectedPlant?.name || 'Local'}</strong> foi finalizado com sucesso. Nossa inteligência artificial mapeou os módulos e classificou as anomalias detectadas.
+              </p>
+
+              <div className="pt-8 flex gap-4">
+                <Link
+                  href="/dashboard/upload"
+                  className="px-8 py-4 bg-slate-900 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-slate-800 transition-all inline-flex items-center"
+                >
+                  Fazer Upload das Imagens <ChevronRight className="ml-2" size={18} />
+                </Link>
+                <Link
+                  href="/dashboard/diagnostico"
+                  className="px-8 py-4 text-white text-sm font-black uppercase tracking-widest rounded-xl shadow-lg hover:opacity-90 transition-all inline-flex items-center"
+                  style={{ backgroundColor: brand.primaryColor, boxShadow: `0 10px 15px -3px ${brand.primaryColor}40` }}
+                >
+                  Ir para Diagnóstico <ChevronRight className="ml-2" size={18} />
+                </Link>
+              </div>
             </div>
           )}
 
