@@ -7,6 +7,7 @@ import { Settings, Image as ImageIcon, Palette, Building2, Undo2, Sun, User, Shi
 import TemplateEditor from '@/components/reports/editor/TemplateEditor';
 import { mockTemplates } from '@/services/mocks/templates';
 import { Template } from '@/types/templates';
+import SecurityTab from './SecurityTab';
 
 function ConfiguracoesContent() {
   const { brand, updateBrand, resetBrand } = useBrand();
@@ -255,15 +256,9 @@ function ConfiguracoesContent() {
             </div>
           )}
 
-          {/* TAB: SEGURANÇA (Placeholder) */}
+          {/* TAB: SEGURANÇA */}
           {configTab === 'seguranca' && (
-            <div className="text-center py-20 flex flex-col items-center animate-in fade-in">
-              <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-300 mb-4">
-                <Shield size={32} />
-              </div>
-              <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Módulo de Segurança</p>
-              <p className="text-[10px] text-slate-400 mt-1">Em desenvolvimento...</p>
-            </div>
+            <SecurityTab />
           )}
 
         </div>

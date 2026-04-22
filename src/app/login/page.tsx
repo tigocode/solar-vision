@@ -1,14 +1,43 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Logo from '@/components/brand/Logo';
 import LoginForm from '@/components/auth/LoginForm';
 import { LoginCredentials } from '@/types/auth';
+import { getStoredUsers } from '@/utils/storage';
 
 const LoginPage = () => {
+  const router = useRouter();
+  const [errorLogin, setErrorLogin] = useState<string | null>(null);
+
   const handleLogin = (credentials: LoginCredentials) => {
-    console.log('Login attempt:', credentials);
-    // Lógica de autenticação virá na próxima fase
+    setErrorLogin(null);
+    const users = getStoredUsers();
+    
+    // Fallback de administrador padrão em caso de ambiente vazio
+    if (credentials.email === 'admin@solarvision.com') {
+       localStorage.setItem('solarvision-viewmode', 'operator');
+       router.push('/dashboard');
+       return;
+    }
+
+    const matchedUser = users.find(u => u.email.toLowerCase() === credentials.email.toLowerCase());
+    
+    if (matchedUser) {
+      if (credentials.password.length < 3) {
+        setErrorLogin('Senha inválida.');
+        return;
+      }
+      
+      const viewMode = matchedUser.role === 'CLIENT' ? 'client' : 'operator';
+      localStorage.setItem('solarvision-viewmode', viewMode);
+      localStorage.setItem('solarvision-user', JSON.stringify(matchedUser));
+      
+      router.push('/dashboard');
+    } else {
+      setErrorLogin('Usuário não encontrado. Use o e-mail cadastrado ou admin@solarvision.com');
+    }
   };
 
   return (
@@ -58,6 +87,11 @@ const LoginPage = () => {
 
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
             <LoginForm onSubmit={handleLogin} />
+            {errorLogin && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-100 text-red-600 text-sm font-bold rounded-lg text-center">
+                {errorLogin}
+              </div>
+            )}
           </div>
 
           <p className="mt-8 text-center text-sm text-slate-500 font-medium">

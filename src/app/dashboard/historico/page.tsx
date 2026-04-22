@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useBrand } from '@/contexts/BrandContext';
-import { History, Search, Activity, AlertTriangle, ShieldAlert, BadgeCheck, FileText } from 'lucide-react';
+import { History, Search, Activity, AlertTriangle, ShieldAlert, BadgeCheck, FileText, Cpu } from 'lucide-react';
 import Link from 'next/link';
 import { getStoredInspections } from '@/utils/storage';
 
@@ -12,7 +12,7 @@ interface HistoryRecord {
   date: string;
   unitName: string;
   healthScore: number;
-  status: 'Concluída' | 'Em Processamento';
+  status: 'Concluída' | 'Em Processamento' | 'Aguardando Análise' | 'Validação Técnica';
   criticalAnomalies: number;
   totalAnomalies: number;
 }
@@ -42,7 +42,7 @@ const mockHistory: HistoryRecord[] = [
     date: '05 de Março, 2026',
     unitName: 'UFV Gamma - Perímetro 1',
     healthScore: 42.0,
-    status: 'Em Processamento',
+    status: 'Aguardando Análise',
     criticalAnomalies: 0,
     totalAnomalies: 0
   },
@@ -61,15 +61,28 @@ export default function HistoricoPage() {
   const { brand } = useBrand();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'Todas' | 'Concluída' | 'Em Processamento' | 'Aguardando Upload'>('Todas');
+  const [statusFilter, setStatusFilter] = useState<string>('Todas');
+
+  const [storedRecords, setStoredRecords] = useState<any[]>([]);
+  const [dynamicOverrides, setDynamicOverrides] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    setStoredRecords(getStoredInspections());
+  }, []);
+
+  const simulateAnalysis = (id: string) => {
+    setDynamicOverrides(prev => ({ ...prev, [id]: 'Em Processamento' }));
+    setTimeout(() => {
+       setDynamicOverrides(prev => ({ ...prev, [id]: 'Validação Técnica' }));
+    }, 3000);
+  };
 
   // Merge Mocks com LocalStorage para a demo
   const allRecords = React.useMemo(() => {
-    const stored = getStoredInspections();
-
-    // Filtramos os mocks para não colidir IDs se necessário, ou apenas adicionamos
-    return [...stored, ...mockHistory.filter(h => !stored.find(s => s.id === h.id))];
-  }, []);
+    const rawData = [...storedRecords, ...mockHistory.filter(h => !storedRecords.find(s => s.id === h.id))];
+    // Override local behavior
+    return rawData.map(r => ({ ...r, status: dynamicOverrides[r.id] || r.status }));
+  }, [storedRecords, dynamicOverrides]);
 
   // Lógica Reativa de Filtragem Combinada
   const filteredRecords = allRecords.filter(record => {
@@ -193,7 +206,7 @@ export default function HistoricoPage() {
                             <p className="text-xs font-medium text-slate-500 mt-1">{record.totalAnomalies} Anomalias Totais</p>
                           </div>
                         ) : (
-                          <div className="text-center md:text-right opacity-50">
+                          <div className="text-center md:text-right">
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Processando Base</p>
                             <p className="text-xs font-medium italic text-slate-500">Métricas Indisponíveis</p>
                           </div>
@@ -203,6 +216,27 @@ export default function HistoricoPage() {
                           <Link href={`/dashboard/relatorios?id=${record.id}`} className="w-full justify-center md:w-auto px-4 py-2 border-2 border-slate-200 hover:border-primary text-slate-600 hover:text-primary transition-colors rounded-xl text-xs font-bold uppercase tracking-widest flex items-center">
                             <FileText size={14} className="mr-2" />
                             Resumo
+                          </Link>
+                        )}
+                        
+                        {record.status === 'Aguardando Análise' && (
+                          <button onClick={() => simulateAnalysis(record.id)} className="w-full justify-center md:w-auto px-4 py-2 bg-blue-600 text-white shadow-lg transition-colors rounded-xl text-xs font-bold uppercase tracking-widest flex items-center hover:bg-blue-700">
+                             <Cpu size={14} className="mr-2" />
+                             Iniciar Análise
+                          </button>
+                        )}
+
+                        {record.status === 'Em Processamento' && (
+                          <div className="w-full justify-center md:w-auto px-4 py-2 bg-amber-50 text-amber-600 border border-amber-200 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center cursor-not-allowed opacity-80">
+                             <Activity size={14} className="mr-2 animate-spin" />
+                             Em Processamento
+                          </div>
+                        )}
+
+                        {record.status === 'Validação Técnica' && (
+                          <Link href={`/dashboard/diagnostico?id=${record.id}`} className="w-full justify-center md:w-auto px-4 py-2 bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 transition-colors rounded-xl text-xs font-bold uppercase tracking-widest flex items-center animate-in zoom-in">
+                            <ShieldAlert size={14} className="mr-2" />
+                            Revisar no Diagnóstico Técnico
                           </Link>
                         )}
 

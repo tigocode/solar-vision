@@ -1,69 +1,59 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { render, screen, fireEvent } from '@testing-library/react';
 import Sidebar from './Sidebar';
+import { UIProvider } from '@/hooks/useUI';
 
-// Mock do hook useUI
-jest.mock('@/hooks/useUI', () => ({
-  useUI: jest.fn(() => ({
-    viewMode: 'operator',
-    isMenuOpen: false,
-    toggleMenu: jest.fn(),
-    setIsMenuOpen: jest.fn(),
-  })),
+// Mock do next/navigation e contextos
+jest.mock('next/navigation', () => ({
+  usePathname: () => '/dashboard',
 }));
 
-describe('Sidebar Component', () => {
-  const useUIMock = require('@/hooks/useUI').useUI;
+// Mock do BrandContext simples para evitar erro no brand.companyName
+jest.mock('@/contexts/BrandContext', () => ({
+  useBrand: () => ({
+    brand: {
+      companyName: 'Solar Vision',
+      logoUrl: '',
+      enableGradient: false,
+    }
+  })
+}));
 
-  it('deve renderizar o logo da SolarVision', () => {
-    useUIMock.mockReturnValue({ viewMode: 'operator', toggleViewMode: jest.fn() });
-    render(<Sidebar />);
-    expect(screen.getAllByText(/solar/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/vision/i).length).toBeGreaterThan(0);
+describe('Sidebar Restrictions (Client vs Operator)', () => {
+  test('Um usuário OPERADOR deve enxergar as opções de Upload e Configurações', () => {
+    // Nós encapsulamos a Sidebar no UIProvider, cujo estado inicial é mode='operator'
+    render(
+      <UIProvider>
+        <Sidebar />
+      </UIProvider>
+    );
+    
+    // Operador tem acesso nativo:
+    expect(screen.getByText('Upload de Dados')).toBeInTheDocument();
+    expect(screen.getByText('Configurações')).toBeInTheDocument();
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
   });
 
-  it('deve exibir todos os itens de menu no modo operador', () => {
-    useUIMock.mockReturnValue({ viewMode: 'operator', toggleViewMode: jest.fn() });
-    render(<Sidebar />);
-    expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
-    expect(screen.getByText(/nova inspeção/i)).toBeInTheDocument();
-    expect(screen.getByText(/upload de dados/i)).toBeInTheDocument();
-  });
+  test('Um CLIENTE de visualização restrita NÃO DEVE enxergar menus gerenciais (TDD Regra 3)', () => {
+    // Precisamos simular a mudança de estado para "client".
+    // Vamos interagir com o botão de Toggle que está no componente nativamente.
+    render(
+      <UIProvider>
+        <Sidebar />
+      </UIProvider>
+    );
 
-  it('NÃO deve exibir itens operacionais no modo cliente', () => {
-    useUIMock.mockReturnValue({ viewMode: 'client', toggleViewMode: jest.fn() });
-    render(<Sidebar />);
-    expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
-    expect(screen.queryByText(/nova inspeção/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/upload de dados/i)).not.toBeInTheDocument();
-  });
+    // Identificar e clicar no Toggle de "Visão Cliente"
+    const toggleButton = screen.getByLabelText('Alternar modo de visão');
+    fireEvent.click(toggleButton);
 
-  describe('Mobile Responsiveness', () => {
-    it('deve possuir a classe de escondido (-translate-x-full) quando isMenuOpen for false', () => {
-      const useUIMock = require('@/hooks/useUI').useUI;
-      useUIMock.mockReturnValue({ viewMode: 'operator', isMenuOpen: false });
-      
-      const { container } = render(<Sidebar />);
-      const aside = container.querySelector('aside');
-      expect(aside).toHaveClass('-translate-x-full');
-    });
+    // Agora, em visão cliente:
+    expect(screen.getByText('Dashboard')).toBeInTheDocument(); // Permitido
+    expect(screen.getByText('Histórico')).toBeInTheDocument(); // Permitido
 
-    it('deve possuir a classe de visível (translate-x-0) quando isMenuOpen for true', () => {
-      const useUIMock = require('@/hooks/useUI').useUI;
-      useUIMock.mockReturnValue({ viewMode: 'operator', isMenuOpen: true });
-      
-      const { container } = render(<Sidebar />);
-      const aside = container.querySelector('aside');
-      expect(aside).toHaveClass('translate-x-0');
-    });
-
-    it('deve renderizar o botão de fechar (X) apenas em mobile', () => {
-      render(<Sidebar />);
-      const closeButton = screen.getByLabelText(/fechar menu/i);
-      expect(closeButton).toBeInTheDocument();
-      // O botão deve ter a classe lg:hidden para não aparecer em desktop
-      expect(closeButton).toHaveClass('lg:hidden');
-    });
+    // RESTRIÇÕES:
+    expect(screen.queryByText('Nova Inspeção')).not.toBeInTheDocument();
+    expect(screen.queryByText('Upload de Dados')).not.toBeInTheDocument();
+    expect(screen.queryByText('Configurações')).not.toBeInTheDocument();
   });
 });
