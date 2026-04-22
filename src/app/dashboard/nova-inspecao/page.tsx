@@ -3,12 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useBrand } from '@/contexts/BrandContext';
-import { UploadCloud, FileImage, FileJson, CheckCircle2, ChevronRight, Activity, Zap, ClipboardList } from 'lucide-react';
+import { UploadCloud, CheckCircle2, ChevronRight, Activity, Zap, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ProjectStatus, AssetType, SolarPlant } from '@/types/plants';
+import { ProjectStatus, SolarPlant } from '@/types/plants';
 import { saveInspection, InspectionRecord } from '@/utils/storage';
-import { v4 as uuidv4 } from 'uuid';
 
 type Step = 'setup' | 'processing' | 'success';
 
