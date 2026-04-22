@@ -54,11 +54,11 @@ const defaultAnomalies: Anomaly[] = [
 function ReportsContent() {
   const searchParams = useSearchParams();
   const inspectionId = searchParams.get('id');
-  
+
   const componentRef = React.useRef<HTMLDivElement>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState(mockTemplates[0].id);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  
+
   // Dados dinâmicos baseados na ID da inspeção
   const [reportData, setReportData] = useState<{
     unitName: string;
@@ -77,18 +77,18 @@ function ReportsContent() {
       // Tenta buscar no storage local ou nos registros conhecidos
       const allInspec = getStoredInspections();
       const match = allInspec.find(i => i.id === inspectionId);
-      
+
       if (match) {
         // Simulação de anomalias específicas
         let specAnomalies = [...defaultAnomalies];
         if (inspectionId === 'H-002') {
-           specAnomalies = Array(8).fill(null).map((_, idx) => ({
-             ...defaultAnomalies[0],
-             id: `VAL-B${idx}`,
-             severity: idx < 3 ? 'Crítico' : 'Médio'
-           }));
+          specAnomalies = Array(8).fill(null).map((_, idx) => ({
+            ...defaultAnomalies[0],
+            id: `VAL-B${idx}`,
+            severity: idx < 3 ? 'Crítico' : 'Médio'
+          }));
         } else if (inspectionId === 'H-004') {
-           specAnomalies = [defaultAnomalies[1]];
+          specAnomalies = [defaultAnomalies[1]];
         }
 
         // Mapeamento de variáveis dinâmicas para o Editor
@@ -130,43 +130,40 @@ function ReportsContent() {
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
     documentTitle: `Relatorio_SolarVision_${new Date().toISOString().split('T')[0]}`,
-    onBeforeGetContent: () => {
+    onBeforePrint: () => {
       return new Promise((resolve) => {
-        // Verifica se todas as imagens no contêiner estão carregadas
+        // O seu código de verificação de imagens permanece igual
         const images = componentRef.current?.querySelectorAll('img');
         if (!images || images.length === 0) {
-          setTimeout(resolve, 300);
+          resolve();
           return;
         }
 
         let loadedCount = 0;
-        const totalImages = images.length;
-
-        const checkImages = () => {
-          loadedCount = 0;
-          images.forEach(img => {
-            if (img.complete && img.naturalWidth > 0) loadedCount++;
-          });
-
-          if (loadedCount === totalImages) {
-            resolve();
+        images.forEach((img) => {
+          if (img.complete) {
+            loadedCount++;
           } else {
-            setTimeout(checkImages, 100);
+            img.addEventListener('load', () => {
+              loadedCount++;
+              if (loadedCount === images.length) resolve();
+            });
+            img.addEventListener('error', () => {
+              loadedCount++;
+              if (loadedCount === images.length) resolve();
+            });
           }
-        };
+        });
 
-        checkImages();
-        
-        // Timeout de segurança para não travar a UI infinitamente
-        setTimeout(resolve, 2000);
+        if (loadedCount === images.length) resolve();
       });
-    }
+    },
   });
 
   return (
     <>
       <div className="flex flex-col h-full space-y-8 animate-in fade-in duration-700 print:hidden pb-20">
-        
+
         {/* HEADER EXECUTIVO DA TELA */}
         <div className="flex flex-col md:flex-row md:items-end justify-between space-y-4 md:space-y-0">
           <div className="space-y-1">
@@ -176,7 +173,7 @@ function ReportsContent() {
             </h1>
             <p className="text-slate-500 font-medium italic">Síntese executiva de diagnósticos validados para o investidor.</p>
           </div>
-          
+
           <div className="flex items-center space-x-2 bg-green-50 px-4 py-2 rounded-2xl border border-green-100">
             <ShieldCheck size={18} className="text-green-600" />
             <span className="text-[10px] font-black text-green-700 uppercase tracking-widest">Snapshot Certificado</span>
@@ -186,18 +183,18 @@ function ReportsContent() {
         {/* SELETOR DE TEMPLATE / PREVIEW ACTION */}
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center space-x-4">
-             <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600">
-                <LayoutTemplate size={24} />
-             </div>
-             <div>
-                <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Configuração do Documento</h3>
-                <p className="text-[10px] text-slate-500 font-medium italic">Escolha o modelo e verifique os dados antes de exportar.</p>
-             </div>
+            <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600">
+              <LayoutTemplate size={24} />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Configuração do Documento</h3>
+              <p className="text-[10px] text-slate-500 font-medium italic">Escolha o modelo e verifique os dados antes de exportar.</p>
+            </div>
           </div>
-          
+
           <div className="flex flex-col md:flex-row items-center gap-4 flex-1 max-w-2xl">
             <div className="relative flex-1 w-full">
-              <select 
+              <select
                 value={selectedTemplateId}
                 onChange={(e) => setSelectedTemplateId(e.target.value)}
                 className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer"
@@ -209,7 +206,7 @@ function ReportsContent() {
               <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
 
-            <button 
+            <button
               onClick={() => setIsPreviewOpen(true)}
               className="flex items-center px-6 py-3 bg-slate-900 text-white hover:bg-slate-800 rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 shrink-0"
             >
@@ -224,22 +221,22 @@ function ReportsContent() {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
           {/* LISTAGEM PRINCIPAL DA TELA */}
           <div className="xl:col-span-8">
-             <ValidatedAnomaliesTable anomalies={reportAnomalies} />
+            <ValidatedAnomaliesTable anomalies={reportAnomalies} />
           </div>
 
           {/* COLUNA LATERAL DE AÇÕES */}
           <div className="xl:col-span-4 space-y-8">
             <ExportAction onExportClick={() => handlePrint()} />
-            
+
             <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
               <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center">
                 <PieChart size={14} className="mr-2 text-indigo-500" /> Índice de Integridade
               </h3>
-              
+
               <div className="space-y-2">
                 <div className="flex justify-between items-end">
-                   <span className="text-[10px] font-bold text-slate-400 uppercase">Saúde Operacional</span>
-                   <span className="text-lg font-black text-slate-800 tracking-tighter italic">{reportData.healthScore}%</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Saúde Operacional</span>
+                  <span className="text-lg font-black text-slate-800 tracking-tighter italic">{reportData.healthScore}%</span>
                 </div>
                 <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-green-500 to-indigo-600 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)]" style={{ width: `${reportData.healthScore}%` }}></div>
@@ -253,94 +250,94 @@ function ReportsContent() {
       {/* MODAL DE PREVIEW */}
       {isPreviewOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-300">
-           <div className="bg-white w-full max-w-5xl h-[90vh] rounded-[40px] shadow-2xl flex flex-col overflow-hidden relative border border-white/20">
-              <div className="p-6 bg-slate-900 flex justify-between items-center text-white">
-                <div className="flex items-center space-x-3">
-                  <LayoutTemplate className="text-amber-400" />
-                  <div>
-                    <h2 className="font-black text-lg uppercase tracking-tight italic">Pré-visualização do Relatório</h2>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Layout: {selectedTemplate.name}</p>
-                  </div>
+          <div className="bg-white w-full max-w-5xl h-[90vh] rounded-[40px] shadow-2xl flex flex-col overflow-hidden relative border border-white/20">
+            <div className="p-6 bg-slate-900 flex justify-between items-center text-white">
+              <div className="flex items-center space-x-3">
+                <LayoutTemplate className="text-amber-400" />
+                <div>
+                  <h2 className="font-black text-lg uppercase tracking-tight italic">Pré-visualização do Relatório</h2>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Layout: {selectedTemplate.name}</p>
                 </div>
-                <button 
-                  onClick={() => setIsPreviewOpen(false)}
-                  className="p-2 bg-slate-800 hover:bg-red-500 transition-colors rounded-xl text-white"
-                >
-                  <X size={20} />
-                </button>
               </div>
+              <button
+                onClick={() => setIsPreviewOpen(false)}
+                className="p-2 bg-slate-800 hover:bg-red-500 transition-colors rounded-xl text-white"
+              >
+                <X size={20} />
+              </button>
+            </div>
 
-              <div className="flex-1 bg-slate-200 overflow-y-auto p-12 flex flex-col items-center space-y-12">
-                 {selectedTemplate.pages.map((_, idx) => (
-                   <div key={idx} className="bg-white shadow-2xl origin-top rounded-sm overflow-hidden min-h-[730px]">
-                      <EditorCanvas 
-                        template={selectedTemplate}
-                        currentPageIndex={idx}
-                        setCurrentPageIndex={() => {}}
-                        zoom={65} 
-                        setZoom={() => {}}
-                        selectedBlockId={null}
-                        setSelectedBlockId={() => {}}
-                        onUpdateBlockGeometry={() => {}}
-                        onAddPage={() => {}}
-                        isPreview={true}
-                        hideUI={true}
-                        anomalies={reportAnomalies}
-                        dynamicMetadata={reportData.metadata}
-                      />
-                   </div>
-                 ))}
-              </div>
+            <div className="flex-1 bg-slate-200 overflow-y-auto p-12 flex flex-col items-center space-y-12">
+              {selectedTemplate.pages.map((_, idx) => (
+                <div key={idx} className="bg-white shadow-2xl origin-top rounded-sm overflow-hidden min-h-[730px]">
+                  <EditorCanvas
+                    template={selectedTemplate}
+                    currentPageIndex={idx}
+                    setCurrentPageIndex={() => { }}
+                    zoom={65}
+                    setZoom={() => { }}
+                    selectedBlockId={null}
+                    setSelectedBlockId={() => { }}
+                    onUpdateBlockGeometry={() => { }}
+                    onAddPage={() => { }}
+                    isPreview={true}
+                    hideUI={true}
+                    anomalies={reportAnomalies}
+                    dynamicMetadata={reportData.metadata}
+                  />
+                </div>
+              ))}
+            </div>
 
-              <div className="p-6 bg-slate-50 border-t border-slate-200 flex justify-end gap-4">
-                 <button 
-                   onClick={() => setIsPreviewOpen(false)}
-                   className="px-6 py-2 bg-slate-200 text-slate-600 font-black rounded-xl uppercase text-xs tracking-widest hover:bg-slate-300 transition-all"
-                 >
-                   Fichar
-                 </button>
-                 <button 
-                   onClick={() => { setIsPreviewOpen(false); handlePrint(); }}
-                   className="px-8 py-2 bg-indigo-600 text-white font-black rounded-xl uppercase text-xs tracking-widest hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all active:scale-95"
-                 >
-                   Confirmar e Gerar PDF
-                 </button>
-              </div>
-           </div>
+            <div className="p-6 bg-slate-50 border-t border-slate-200 flex justify-end gap-4">
+              <button
+                onClick={() => setIsPreviewOpen(false)}
+                className="px-6 py-2 bg-slate-200 text-slate-600 font-black rounded-xl uppercase text-xs tracking-widest hover:bg-slate-300 transition-all"
+              >
+                Fichar
+              </button>
+              <button
+                onClick={() => { setIsPreviewOpen(false); handlePrint(); }}
+                className="px-8 py-2 bg-indigo-600 text-white font-black rounded-xl uppercase text-xs tracking-widest hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all active:scale-95"
+              >
+                Confirmar e Gerar PDF
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
       {/* COMPONENTE DEVE ESTAR NO DOM PARA IMPRESSÃO MAS ESCONDIDO DA TELA NORMAL (OFF-SCREEN) */}
       <div className="opacity-0 pointer-events-none absolute -left-[9999px] print:static print:opacity-100 print:overflow-visible overflow-visible h-auto">
         <div ref={componentRef}>
-           <div className="flex flex-col space-y-0">
-             <style type="text/css" media="print">
-               {`
+          <div className="flex flex-col space-y-0">
+            <style type="text/css" media="print">
+              {`
                  @page { size: A4 portrait; margin: 0; }
                  body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
                  .print-page { page-break-after: always; overflow: hidden; height: 1123px; width: 794px; position: relative; }
                `}
-             </style>
-             {selectedTemplate.pages.map((_, pageIdx) => (
-               <div key={pageIdx} className="print-page">
-                 <EditorCanvas 
-                    template={selectedTemplate}
-                    currentPageIndex={pageIdx}
-                    setCurrentPageIndex={() => {}}
-                    zoom={100}
-                    setZoom={() => {}}
-                    selectedBlockId={null}
-                    setSelectedBlockId={() => {}}
-                    onUpdateBlockGeometry={() => {}}
-                    onAddPage={() => {}}
-                    isPreview={true}
-                    hideUI={true}
-                    anomalies={reportAnomalies}
-                    dynamicMetadata={reportData.metadata}
-                 />
-               </div>
-             ))}
-           </div>
+            </style>
+            {selectedTemplate.pages.map((_, pageIdx) => (
+              <div key={pageIdx} className="print-page">
+                <EditorCanvas
+                  template={selectedTemplate}
+                  currentPageIndex={pageIdx}
+                  setCurrentPageIndex={() => { }}
+                  zoom={100}
+                  setZoom={() => { }}
+                  selectedBlockId={null}
+                  setSelectedBlockId={() => { }}
+                  onUpdateBlockGeometry={() => { }}
+                  onAddPage={() => { }}
+                  isPreview={true}
+                  hideUI={true}
+                  anomalies={reportAnomalies}
+                  dynamicMetadata={reportData.metadata}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </>
