@@ -5,15 +5,13 @@ import { useParams, useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Anomaly } from '@/types/anomalies';
 import SeverityBadge from '@/components/diagnostics/SeverityBadge';
-import { 
-  ChevronRight, 
-  ArrowLeft, 
-  MapPin, 
-  Thermometer, 
-  Box, 
-  Clock,
-  Layers,
-  Activity
+import {
+  ChevronRight,
+  ArrowLeft,
+  MapPin,
+  Thermometer,
+  Box,
+  Clock
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -54,16 +52,16 @@ const mockAnomalies: Anomaly[] = [
 function AnomalyDetailContent() {
   const { id } = useParams();
   const router = useRouter();
-  
+
   // Busca a anomalia pelo ID (ou usa a primeira como fallback para o demo)
   const anomalyBase = mockAnomalies.find(a => a.id === id) || mockAnomalies[0];
-  
+
   // Estado local para o demo para refletir mudanças de status na UI
   const [currentStatus, setCurrentStatus] = React.useState(anomalyBase.status);
 
   return (
     <div className="animate-in slide-in-from-bottom-4 duration-500 flex flex-col h-full space-y-6">
-      
+
       {/* NAVEGAÇÃO E BREADCRUMBS */}
       <div className="flex flex-col space-y-4">
         <nav className="flex items-center space-x-2 text-xs font-medium text-slate-400">
@@ -76,7 +74,7 @@ function AnomalyDetailContent() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <button 
+            <button
               onClick={() => router.back()}
               className="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
             >
@@ -87,13 +85,12 @@ function AnomalyDetailContent() {
               <p className="text-sm text-slate-500 font-medium">{anomalyBase.type}</p>
             </div>
           </div>
-          
+
           <div className="flex space-x-3">
-            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ring-1 ring-inset ${
-              currentStatus === 'Resolvido' ? 'bg-green-50 text-green-700 ring-green-600/20' : 
-              currentStatus === 'Falso Positivo' ? 'bg-amber-50 text-amber-700 ring-amber-600/20' :
-              'bg-blue-50 text-blue-700 ring-blue-600/20'
-            }`}>
+            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ring-1 ring-inset ${currentStatus === 'Resolvido' ? 'bg-green-50 text-green-700 ring-green-600/20' :
+                currentStatus === 'Falso Positivo' ? 'bg-amber-50 text-amber-700 ring-amber-600/20' :
+                  'bg-blue-50 text-blue-700 ring-blue-600/20'
+              }`}>
               Status: {currentStatus}
             </span>
           </div>
@@ -101,11 +98,11 @@ function AnomalyDetailContent() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0">
-        
+
         {/* LADO ESQUERDO: Visualizador Digital Twin (Regra 5) */}
         <div className="lg:col-span-8 space-y-6 flex flex-col">
           <div className="flex-1 min-h-[500px]">
-             <AnomalyVisualizer anomaly={anomalyBase} />
+            <AnomalyVisualizer anomaly={anomalyBase} />
           </div>
 
           {/* Card de Detalhes Adicionais */}
@@ -125,11 +122,11 @@ function AnomalyDetailContent() {
 
         {/* LADO DIREITO: Informações Técnicas e Localização */}
         <div className="lg:col-span-4 space-y-6">
-          
+
           {/* PAINEL DE AÇÕES DO OPERADOR (Regra 3 / Ciclo 6) */}
-          <AnomalyActions 
-            status={currentStatus} 
-            onStatusChange={setCurrentStatus} 
+          <AnomalyActions
+            status={currentStatus}
+            onStatusChange={setCurrentStatus}
           />
 
           {/* Card de Severidade */}
@@ -137,7 +134,7 @@ function AnomalyDetailContent() {
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center">
               <Thermometer size={14} className="mr-2 text-amber-500" /> Diagnóstico de Temperatura
             </h3>
-            
+
             <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
               <div className="space-y-1">
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Delta de Temperatura</p>
@@ -162,7 +159,7 @@ function AnomalyDetailContent() {
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center">
               <MapPin size={14} className="mr-2 text-blue-500" /> Localização do Ativo
             </h3>
-            
+
             <div className="divide-y divide-slate-100 italic-titles">
               <div className="py-3 flex justify-between items-center">
                 <span className="text-xs text-slate-500 font-medium italic">Rota (Cluster)</span>
@@ -174,14 +171,13 @@ function AnomalyDetailContent() {
               </div>
               <div className="py-3 flex justify-between items-center">
                 <span className="text-xs text-slate-500 font-medium italic">Posição do Módulo</span>
-                <span className={`text-[10px] font-black uppercase px-2 py-1 rounded ${
-                  anomalyBase.location.position === 'superior' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-700'
-                }`}>
+                <span className={`text-[10px] font-black uppercase px-2 py-1 rounded ${anomalyBase.location.position === 'superior' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-700'
+                  }`}>
                   {anomalyBase.location.position}
                 </span>
               </div>
             </div>
-            
+
             {anomalyBase.coordinates && (
               <div className="pt-4 border-t border-slate-100">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Coordenadas Reais (GPS)</p>

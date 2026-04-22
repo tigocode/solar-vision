@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ZoomIn, ZoomOut, Sun, Map as MapIcon, TableProperties, ChevronLeft, ChevronRight, Plus, ShieldAlert, Camera } from 'lucide-react';
+import { ZoomIn, ZoomOut, Sun, ChevronLeft, ChevronRight, Plus, ShieldAlert } from 'lucide-react';
 import { Template, EditorBlock } from '@/types/templates';
 import EditorBlockWrapper from './EditorBlockWrapper';
 import { replacePlaceholders, MOCK_REPORT_DATA, getFilteredAnomalies, IEC_BLOCK_MOCK } from '@/utils/reportData';
@@ -23,13 +23,13 @@ interface EditorCanvasProps {
   dynamicMetadata?: Record<string, string>;
 }
 
-export default function EditorCanvas({ 
-  template, 
+export default function EditorCanvas({
+  template,
   currentPageIndex,
   setCurrentPageIndex,
-  zoom, 
-  setZoom, 
-  selectedBlockId, 
+  zoom,
+  setZoom,
+  selectedBlockId,
   setSelectedBlockId,
   onUpdateBlockGeometry,
   onAddPage,
@@ -39,7 +39,7 @@ export default function EditorCanvas({
   anomalies = [],
   dynamicMetadata
 }: EditorCanvasProps) {
-  
+
   const handleCanvasClick = () => {
     if (!hideUI) setSelectedBlockId(null);
   };
@@ -51,10 +51,10 @@ export default function EditorCanvas({
           <div className="flex justify-between items-center border-b-2 border-amber-500 pb-4 h-full w-full bg-white select-none overflow-hidden">
             <div className="flex items-center space-x-3 text-slate-800">
               {brandLogo ? (
-                <img 
-                  src={brandLogo} 
-                  alt="Logo" 
-                  className="h-10 w-auto object-contain" 
+                <img
+                  src={brandLogo}
+                  alt="Logo"
+                  className="h-10 w-auto object-contain"
                   {...(brandLogo.startsWith('http') ? { crossOrigin: 'anonymous' } : {})}
                   loading="eager"
                   decoding="sync"
@@ -76,7 +76,7 @@ export default function EditorCanvas({
         );
       case 'text':
         return (
-          <div className="w-full h-full p-2 flex flex-col justify-center overflow-hidden whitespace-pre-wrap" style={{ 
+          <div className="w-full h-full p-2 flex flex-col justify-center overflow-hidden whitespace-pre-wrap" style={{
             textAlign: block.style?.textAlign,
             fontSize: block.style?.fontSize || '12px',
             fontWeight: block.style?.fontWeight || 'normal',
@@ -87,7 +87,7 @@ export default function EditorCanvas({
           }}>
             <div className="w-full h-full">
               {isPreview || hideUI
-                ? replacePlaceholders(block.content || '', dynamicMetadata || MOCK_REPORT_DATA) 
+                ? replacePlaceholders(block.content || '', dynamicMetadata || MOCK_REPORT_DATA)
                 : (block.content || 'Digite seu texto...')}
             </div>
           </div>
@@ -95,7 +95,7 @@ export default function EditorCanvas({
       case 'table':
         const filtered = getFilteredAnomalies(anomalies, block.config?.severityFilter);
         return (
-          <div 
+          <div
             data-testid={`table-block-${block.id}`}
             className="w-full h-full border border-slate-200 bg-white flex flex-col rounded-lg overflow-hidden relative shadow-sm"
           >
@@ -122,9 +122,9 @@ export default function EditorCanvas({
                     <tr key={a.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                       <td className="p-2 font-black text-slate-800">{a.id}</td>
                       <td className="p-2">
-                         <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${a.severity === 'Crítico' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
-                           {a.severity}
-                         </span>
+                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${a.severity === 'Crítico' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
+                          {a.severity}
+                        </span>
                       </td>
                       <td className="p-2 font-black">+{a.deltaT}°C</td>
                       <td className="p-2 italic">{a.status}</td>
@@ -144,48 +144,48 @@ export default function EditorCanvas({
         return (
           <div className="w-full h-full bg-white border border-slate-200 rounded-2xl p-4 flex flex-col space-y-4 shadow-sm overflow-hidden">
             <div className="flex items-center space-x-2 border-b border-slate-100 pb-2">
-               <ShieldAlert size={14} className="text-red-500" />
-               <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Norma IEC TS 62446-3: Detalhamento de Anomalia</span>
+              <ShieldAlert size={14} className="text-red-500" />
+              <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Norma IEC TS 62446-3: Detalhamento de Anomalia</span>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-3 flex-1">
-               <div className="relative rounded-xl overflow-hidden border border-slate-100 group">
-                  <img 
-                    src={IEC_BLOCK_MOCK.thermalUrl} 
-                    alt="Thermal" 
-                    className="w-full h-full object-cover transition-transform group-hover:scale-110" 
-                    {...(IEC_BLOCK_MOCK.thermalUrl.startsWith('http') ? { crossOrigin: 'anonymous' } : {})}
-                    loading="eager"
-                    decoding="sync"
-                  />
-                  <div className="absolute top-2 left-2 bg-red-600/90 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest shadow-xl">Térmica</div>
-               </div>
-               <div className="relative rounded-xl overflow-hidden border border-slate-100 group">
-                  <img 
-                    src={IEC_BLOCK_MOCK.rgbUrl} 
-                    alt="RGB" 
-                    className="w-full h-full object-cover transition-transform group-hover:scale-110" 
-                    {...(IEC_BLOCK_MOCK.rgbUrl.startsWith('http') ? { crossOrigin: 'anonymous' } : {})}
-                    loading="eager"
-                    decoding="sync"
-                  />
-                  <div className="absolute top-2 left-2 bg-blue-600/90 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest shadow-xl">Visual (RGB)</div>
-               </div>
+              <div className="relative rounded-xl overflow-hidden border border-slate-100 group">
+                <img
+                  src={IEC_BLOCK_MOCK.thermalUrl}
+                  alt="Thermal"
+                  className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                  {...(IEC_BLOCK_MOCK.thermalUrl.startsWith('http') ? { crossOrigin: 'anonymous' } : {})}
+                  loading="eager"
+                  decoding="sync"
+                />
+                <div className="absolute top-2 left-2 bg-red-600/90 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest shadow-xl">Térmica</div>
+              </div>
+              <div className="relative rounded-xl overflow-hidden border border-slate-100 group">
+                <img
+                  src={IEC_BLOCK_MOCK.rgbUrl}
+                  alt="RGB"
+                  className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                  {...(IEC_BLOCK_MOCK.rgbUrl.startsWith('http') ? { crossOrigin: 'anonymous' } : {})}
+                  loading="eager"
+                  decoding="sync"
+                />
+                <div className="absolute top-2 left-2 bg-blue-600/90 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest shadow-xl">Visual (RGB)</div>
+              </div>
             </div>
 
             <div className="grid grid-cols-3 gap-2 mt-auto">
-               <div className="bg-slate-50 p-2 rounded-xl flex flex-col items-center justify-center border border-slate-100">
-                  <span className="text-[7px] font-black text-slate-400 uppercase">Severidade</span>
-                  <span className="text-xs font-black text-red-600">{IEC_BLOCK_MOCK.severity}</span>
-               </div>
-               <div className="bg-slate-50 p-2 rounded-xl flex flex-col items-center justify-center border border-slate-100">
-                  <span className="text-[7px] font-black text-slate-400 uppercase">Delta T</span>
-                  <span className="text-xs font-black text-slate-800">+{IEC_BLOCK_MOCK.deltaT}°C</span>
-               </div>
-               <div className="bg-slate-50 p-2 rounded-xl flex flex-col items-center justify-center border border-slate-100">
-                  <span className="text-[7px] font-black text-slate-400 uppercase">Localização</span>
-                  <span className="text-[9px] font-black text-slate-600 truncate w-full text-center">{IEC_BLOCK_MOCK.location}</span>
-               </div>
+              <div className="bg-slate-50 p-2 rounded-xl flex flex-col items-center justify-center border border-slate-100">
+                <span className="text-[7px] font-black text-slate-400 uppercase">Severidade</span>
+                <span className="text-xs font-black text-red-600">{IEC_BLOCK_MOCK.severity}</span>
+              </div>
+              <div className="bg-slate-50 p-2 rounded-xl flex flex-col items-center justify-center border border-slate-100">
+                <span className="text-[7px] font-black text-slate-400 uppercase">Delta T</span>
+                <span className="text-xs font-black text-slate-800">+{IEC_BLOCK_MOCK.deltaT}°C</span>
+              </div>
+              <div className="bg-slate-50 p-2 rounded-xl flex flex-col items-center justify-center border border-slate-100">
+                <span className="text-[7px] font-black text-slate-400 uppercase">Localização</span>
+                <span className="text-[9px] font-black text-slate-600 truncate w-full text-center">{IEC_BLOCK_MOCK.location}</span>
+              </div>
             </div>
           </div>
         );
@@ -199,10 +199,10 @@ export default function EditorCanvas({
   };
 
   return (
-    <div 
+    <div
       className={`flex-1 bg-slate-100 overflow-auto flex flex-col items-center relative cursor-default scroll-smooth ${hideUI ? 'py-0 h-auto' : 'py-20'}`}
-      style={{ 
-        backgroundImage: hideUI ? 'none' : 'radial-gradient(#cbd5e1 1px, transparent 1px)', 
+      style={{
+        backgroundImage: hideUI ? 'none' : 'radial-gradient(#cbd5e1 1px, transparent 1px)',
         backgroundSize: '30px 30px'
       }}
       onClick={handleCanvasClick}
@@ -212,15 +212,15 @@ export default function EditorCanvas({
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center space-x-4 z-50">
           {/* Zoom Controls */}
           <div className="bg-slate-800 text-white rounded-full shadow-2xl flex items-center px-4 py-2 space-x-6 animate-in slide-in-from-bottom-4 duration-500">
-            <button 
-              onClick={(e) => { e.stopPropagation(); setZoom(z => Math.max(25, z - 10)); }} 
+            <button
+              onClick={(e) => { e.stopPropagation(); setZoom(z => Math.max(25, z - 10)); }}
               className="hover:text-amber-400 transition-colors"
             >
               <ZoomOut size={18} />
             </button>
             <span className="text-xs font-black tracking-widest w-12 text-center">{zoom}%</span>
-            <button 
-              onClick={(e) => { e.stopPropagation(); setZoom(z => Math.min(150, z + 10)); }} 
+            <button
+              onClick={(e) => { e.stopPropagation(); setZoom(z => Math.min(150, z + 10)); }}
               className="hover:text-amber-400 transition-colors"
             >
               <ZoomIn size={18} />
@@ -229,7 +229,7 @@ export default function EditorCanvas({
 
           {/* Page Navigation Controls */}
           <div className="bg-white border border-slate-200 rounded-full shadow-2xl flex items-center px-2 py-1 space-x-1 animate-in slide-in-from-bottom-4 duration-700">
-            <button 
+            <button
               disabled={currentPageIndex === 0}
               onClick={(e) => { e.stopPropagation(); setCurrentPageIndex(currentPageIndex - 1); }}
               className={`p-2 rounded-full transition-colors ${currentPageIndex === 0 ? 'text-slate-200' : 'text-slate-600 hover:bg-slate-100 hover:text-primary'}`}
@@ -238,14 +238,14 @@ export default function EditorCanvas({
             >
               <ChevronLeft size={20} />
             </button>
-            
+
             <div className="px-3 py-1 bg-slate-50 rounded-full border border-slate-100">
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">
                 Página {currentPageIndex + 1} de {template.pages.length}
               </span>
             </div>
 
-            <button 
+            <button
               disabled={currentPageIndex === template.pages.length - 1}
               onClick={(e) => { e.stopPropagation(); setCurrentPageIndex(currentPageIndex + 1); }}
               className={`p-2 rounded-full transition-colors ${currentPageIndex === template.pages.length - 1 ? 'text-slate-200' : 'text-slate-600 hover:bg-slate-100 hover:text-primary'}`}
@@ -257,7 +257,7 @@ export default function EditorCanvas({
 
             <div className="w-px h-4 bg-slate-200 mx-1"></div>
 
-            <button 
+            <button
               onClick={(e) => { e.stopPropagation(); onAddPage(); }}
               className="p-2 rounded-full text-slate-600 hover:bg-primary/10 hover:text-primary transition-all group"
               title="Adicionar Página"

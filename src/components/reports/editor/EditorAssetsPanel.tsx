@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Database, LayoutModule, Map as MapIcon, TableProperties, ImageIcon, Type } from 'lucide-react';
+import { Database, Map as MapIcon, TableProperties, ImageIcon, Type } from 'lucide-react';
 import { EditorBlock } from '@/types/templates';
 import { EditorTab } from './EditorSidebar';
 import { AVAILABLE_VARIABLES } from '@/utils/reportData';
@@ -12,7 +12,7 @@ interface EditorAssetsPanelProps {
 }
 
 const DraggableVar = ({ label, desc, onClick }: { label: string; desc: string, onClick: () => void }) => (
-  <button 
+  <button
     onClick={onClick}
     className="w-full text-left p-3 border border-slate-200 rounded-xl bg-white hover:border-primary hover:bg-primary/5 transition-all group shadow-sm"
   >
@@ -22,7 +22,7 @@ const DraggableVar = ({ label, desc, onClick }: { label: string; desc: string, o
 );
 
 const DraggableModule = ({ icon, label, onClick }: { icon: React.ReactNode; label: string, onClick: () => void }) => (
-  <button 
+  <button
     onClick={onClick}
     className="w-full p-3 bg-white border border-slate-200 rounded-xl hover:border-amber-400 flex items-center space-x-3 transition-all shadow-sm group"
   >
@@ -40,16 +40,16 @@ export default function EditorAssetsPanel({ activeTab, onAddBlock }: EditorAsset
           {activeTab}
         </p>
       </div>
-      
+
       <div className="p-4 flex-1 overflow-y-auto space-y-6 scrollbar-thin scrollbar-thumb-slate-200">
-        
+
         {/* TAB: TEXTO */}
         {(activeTab === 'text' || activeTab === 'design') && (
           <div className="animate-in fade-in slide-in-from-top-2 duration-300">
             <h5 className="text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest flex items-center">
-               Elementos de Texto
+              Elementos de Texto
             </h5>
-            <button 
+            <button
               onClick={() => onAddBlock('text', 'Clique duas vezes para editar ou use a lateral')}
               className="w-full p-3 border border-dashed border-slate-300 rounded-xl bg-slate-50 hover:border-primary hover:bg-primary/5 transition-all flex items-center space-x-3 group"
             >
@@ -67,11 +67,11 @@ export default function EditorAssetsPanel({ activeTab, onAddBlock }: EditorAsset
             </h5>
             <div className="space-y-2">
               {AVAILABLE_VARIABLES.map((v) => (
-                <DraggableVar 
-                  key={v.id} 
-                  label={v.label} 
-                  desc={v.desc} 
-                  onClick={() => onAddBlock('text', v.label)} 
+                <DraggableVar
+                  key={v.id}
+                  label={v.label}
+                  desc={v.desc}
+                  onClick={() => onAddBlock('text', v.label)}
                 />
               ))}
             </div>
@@ -82,7 +82,7 @@ export default function EditorAssetsPanel({ activeTab, onAddBlock }: EditorAsset
         {(activeTab === 'tables' || activeTab === 'images' || activeTab === 'design') && (
           <div className="pt-4 border-t border-slate-100 animate-in fade-in slide-in-from-top-2 duration-500">
             <h5 className="text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest flex items-center">
-               Módulos Avançados
+              Módulos Avançados
             </h5>
             <div className="space-y-2">
               {(activeTab === 'tables' || activeTab === 'design') && (
