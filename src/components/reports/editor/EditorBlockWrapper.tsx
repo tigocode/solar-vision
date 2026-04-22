@@ -15,10 +15,10 @@ interface EditorBlockWrapperProps {
   hideUI?: boolean;
 }
 
-export default function EditorBlockWrapper({ 
-  block, 
-  isSelected, 
-  onClick, 
+export default function EditorBlockWrapper({
+  block,
+  isSelected,
+  onClick,
   onGeometryChange,
   scale,
   children,
@@ -45,21 +45,20 @@ export default function EditorBlockWrapper({
       bounds="parent"
       enableResizing={!hideUI && isSelected}
       disableDragging={hideUI || !isSelected}
-      onClick={(e) => {
+      onClick={(e: React.MouseEvent) => {
         if (!hideUI) {
           e.stopPropagation();
-          onClick();
+          onClick(); // Esta é a função onClick que vem das props do seu componente
         }
       }}
       style={{
         zIndex: isSelected ? 50 : 10,
       }}
       dragHandleClassName="drag-handle"
-      className={`group transition-all duration-200 ${
-        !hideUI && isSelected 
-          ? 'ring-2 ring-amber-500 shadow-xl' 
+      className={`group transition-all duration-200 ${!hideUI && isSelected
+          ? 'ring-2 ring-amber-500 shadow-xl'
           : !hideUI ? 'hover:ring-2 hover:ring-amber-500/30' : ''
-      }`}
+        }`}
     >
       <div className="w-full h-full relative" style={{ ...block.style }}>
         {children}
