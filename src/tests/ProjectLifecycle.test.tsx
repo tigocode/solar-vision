@@ -61,11 +61,11 @@ describe('ProjectStatus Enum — 9 etapas', () => {
   });
 
   it('não deve conter etapas do workflow antigo (ex: PROCESSAMENTO_DADOS)', () => {
-    // @ts-expect-error — chave inexistente no enum novo
+    // @ts-expect-error - verifica que chave PROCESSAMENTO_DADOS foi removida do enum
     expect(ProjectStatus.PROCESSAMENTO_DADOS).toBeUndefined();
-    // @ts-expect-error
+    // @ts-expect-error - verifica que chave COMISSIONAMENTO foi removida do enum
     expect(ProjectStatus.COMISSIONAMENTO).toBeUndefined();
-    // @ts-expect-error
+    // @ts-expect-error - verifica que chave MONTAGEM_PAINEIS foi removida do enum
     expect(ProjectStatus.MONTAGEM_PAINEIS).toBeUndefined();
   });
 

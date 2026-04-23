@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import DiagnosticToolbar from './DiagnosticToolbar';
+import { Severity, AnomalyStatus } from '@/types/anomalies';
 
 describe('DiagnosticToolbar Component', () => {
   const mockOnSearch = jest.fn();
@@ -12,8 +13,8 @@ describe('DiagnosticToolbar Component', () => {
     searchQuery: '',
     onSearch: mockOnSearch,
     activeFilters: {
-      severity: [] as string[],
-      status: [] as string[]
+      severity: [] as Severity[],
+      status: [] as AnomalyStatus[]
     },
     onFilterChange: mockOnFilterChange,
     onClear: mockOnClear
@@ -66,8 +67,8 @@ describe('DiagnosticToolbar Component', () => {
     const propsWithFilters = {
       ...defaultProps,
       activeFilters: {
-        severity: ['Crítico'],
-        status: ['Resolvido']
+        severity: ['Crítico'] as Severity[],
+        status: ['Resolvido'] as AnomalyStatus[]
       }
     };
     

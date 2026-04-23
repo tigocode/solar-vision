@@ -23,14 +23,14 @@ describe('EditorPropertiesPanel', () => {
   const mockOnChange = jest.fn();
 
   it('deve exibir as propriedades do bloco selecionado', () => {
-    render(<EditorPropertiesPanel block={mockBlock} onChange={mockOnChange} />);
+    render(<EditorPropertiesPanel block={mockBlock} onChange={mockOnChange} onDelete={jest.fn()} />);
     
     expect(screen.getByText(/propriedades/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/alinhamento/i)).toBeInTheDocument();
   });
 
   it('deve chamar onChange ao alterar o alinhamento', () => {
-    render(<EditorPropertiesPanel block={mockBlock} onChange={mockOnChange} />);
+    render(<EditorPropertiesPanel block={mockBlock} onChange={mockOnChange} onDelete={jest.fn()} />);
     
     const centerAlignBtn = screen.getByLabelText(/alinhar ao centro/i);
     fireEvent.click(centerAlignBtn);

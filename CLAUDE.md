@@ -64,3 +64,11 @@
 ## 🎨 8. Integração de UI (Mestre das Interfaces)
 * **Referências Visuais:** Todo código base focado em layout e prototipação gerado previamente fica armazenado na pasta `_prototypes/`. 
 * **Regra de Uso:** Quando solicitado para construir uma nova tela ou componente visual, a IA DEVE primeiro analisar o arquivo correspondente em `_prototypes/` para extrair as classes do Tailwind e a estrutura HTML/JSX/tsx, adaptando esse visual "sujo" para a arquitetura limpa do projeto (separando componentes, aplicando contratos e adicionando os testes).
+
+## 🚀 9. Esteira de CI/CD e Qualidade (Pre-deploy)
+* **Regra de Ouro:** O deploy automático em plataformas (Vercel/Render) deve ser a última etapa. Antes disso, o código deve passar pelo "Safety Gate" local ou via GitHub Actions.
+* **Comandos Obrigatórios antes de cada Push:**
+    1. `npx tsc --noEmit`: Verifica se existem erros de TypeScript (como os que pegamos antes).
+    2. `npm run lint`: Garante que não há erros de sintaxe ou regras de estilo quebradas.
+    3. `npm run build`: Simula o build de produção localmente para captar erros de Hidratação ou imports.
+* **Bloqueio de Erros Repetitivos:** Se o build falhar localmente por causa de `any` implícito ou `undefined`, é proibido forçar o push.

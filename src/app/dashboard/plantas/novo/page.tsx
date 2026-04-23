@@ -261,7 +261,7 @@ function NewPlantPageContent() {
    const { brand } = useBrand();
    const { viewMode } = useUI();
 
-   const [projects, setProjects] = useState<SolarProjectFlow[]>([]);
+   const [projects, setProjects] = useState<SolarProjectFlow<FormData>[]>([]);
    const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
 
    const [currentStep, setCurrentStep] = useState(0);
@@ -269,7 +269,7 @@ function NewPlantPageContent() {
    const [form, setForm] = useState<FormData>(INITIAL_FORM);
 
    useEffect(() => {
-      setProjects(getStoredProjects());
+      setProjects(getStoredProjects() as unknown as SolarProjectFlow<FormData>[]);
    }, []);
 
    const openProject = (id: string | null) => {
@@ -298,7 +298,7 @@ function NewPlantPageContent() {
    const saveToStorage = (step: number, formData: FormData) => {
       const isNew = !activeProjectId || activeProjectId === 'new';
       const projId = isNew ? `P-${Date.now()}` : activeProjectId;
-      const newProject: SolarProjectFlow = {
+      const newProject: SolarProjectFlow<FormData> = {
          id: projId,
          name: formData.plantName || 'Novo Projeto',
          assetType: formData.assetType,
@@ -308,7 +308,7 @@ function NewPlantPageContent() {
          formData: formData
       };
       saveProjectFlow(newProject);
-      setProjects(getStoredProjects());
+      setProjects(getStoredProjects() as unknown as SolarProjectFlow<FormData>[]);
       if (isNew) setActiveProjectId(projId);
    };
 

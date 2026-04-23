@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { ZoomIn, ZoomOut, Sun, ChevronLeft, ChevronRight, Plus, ShieldAlert } from 'lucide-react';
 import { Template, EditorBlock } from '@/types/templates';
 import EditorBlockWrapper from './EditorBlockWrapper';
@@ -62,7 +61,7 @@ export default function EditorCanvas({
               ) : (
                 <>
                   <Sun size={24} className="text-amber-500" />
-                  <span className="font-black text-xl tracking-tight">Facilit'Air O&M</span>
+                  <span className="font-black text-xl tracking-tight">SolarVision</span>
                 </>
               )}
             </div>
@@ -93,7 +92,7 @@ export default function EditorCanvas({
           </div>
         );
       case 'table':
-        const filtered = getFilteredAnomalies(anomalies, block.config?.severityFilter);
+        const filtered = getFilteredAnomalies(anomalies, block.config?.severityFilter as string | undefined);
         return (
           <div
             data-testid={`table-block-${block.id}`}

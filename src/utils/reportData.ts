@@ -1,3 +1,5 @@
+import { Anomaly } from '@/types/anomalies';
+
 /**
  * Utilitário para substituição de placeholders em relatórios.
  * Substitui chaves no formato {{Variavel}} pelos valores correspondentes.
@@ -14,7 +16,7 @@ export function replacePlaceholders(text: string, data: Record<string, string>):
 /**
  * Filtra anomalias com base na severidade configurada no bloco.
  */
-export function getFilteredAnomalies(anomalies: any[], filter?: string) {
+export function getFilteredAnomalies(anomalies: Anomaly[], filter?: string) {
   if (!filter || filter === 'Todos') return anomalies;
   return anomalies.filter(a => a.severity.toLowerCase() === filter.toLowerCase());
 }

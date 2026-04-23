@@ -90,14 +90,14 @@ export const saveAuditLog = (log: AuditLogEntry) => {
 // --- MULTIPLE PROJECTS LIFECYCLE MOCKS ---
 const PROJECTS_STORAGE_KEY = 'solar_projects';
 
-export interface SolarProjectFlow {
+export interface SolarProjectFlow<T = Record<string, unknown>> {
   id: string;
   name: string;
   assetType: 'UFV' | 'COMPLEXO';
   currentStep: number;
   lastUpdated: string;
   createdAt: string;
-  formData: any; // Armazenará encapsulado todo o objeto FormData
+  formData: T; // Genérico: permite tipagem forte no consumidor
 }
 
 export const getStoredProjects = (): SolarProjectFlow[] => {
@@ -106,7 +106,7 @@ export const getStoredProjects = (): SolarProjectFlow[] => {
   return stored ? JSON.parse(stored) : [];
 };
 
-export const saveProjectFlow = (project: SolarProjectFlow) => {
+export const saveProjectFlow = <T = Record<string, unknown>>(project: SolarProjectFlow<T>) => {
   const current = getStoredProjects();
   const next = [project, ...current.filter(p => p.id !== project.id)];
   localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(next));

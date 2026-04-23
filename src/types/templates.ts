@@ -11,14 +11,18 @@ export interface EditorBlock {
   style?: {
     fontSize?: string;
     fontWeight?: string;
+    fontFamily?: string;
+    italic?: boolean;
+    lineHeight?: string;
     color?: string;
     backgroundColor?: string;
-    textAlign?: 'left' | 'center' | 'right';
+    textAlign?: 'left' | 'center' | 'right' | 'justify';
     borderRadius?: string;
     opacity?: number;
     zIndex?: number;
+    tableStyle?: string;
   };
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 }
 
 export interface TemplatePage {
