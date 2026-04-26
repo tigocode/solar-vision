@@ -347,7 +347,13 @@ function ReportsContent() {
 export default function ReportsPage() {
   return (
     <DashboardLayout>
-      <ReportsContent />
+      <React.Suspense fallback={
+        <div className="flex-1 flex items-center justify-center p-8 text-slate-400 font-bold animate-pulse">
+          Carregando relatórios...
+        </div>
+      }>
+        <ReportsContent />
+      </React.Suspense>
     </DashboardLayout>
   );
 }

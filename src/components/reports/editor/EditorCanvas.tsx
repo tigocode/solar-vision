@@ -100,9 +100,9 @@ export default function EditorCanvas({
           >
             <div className="bg-slate-900 p-2 border-b border-slate-800 text-white flex justify-between items-center">
               <span className="text-[10px] font-black uppercase italic tracking-widest">{block.content || 'Tabela de Dados'}</span>
-              {block.config?.severityFilter && (
+              {!!block.config?.severityFilter && (
                 <span className="bg-amber-500 text-slate-900 text-[8px] font-black px-1.5 py-0.5 rounded italic">
-                  FILTRO: {block.config.severityFilter}
+                  FILTRO: {String(block.config.severityFilter)}
                 </span>
               )}
             </div>

@@ -300,7 +300,13 @@ function DiagnosticoContent() {
 export default function DiagnosticoPage() {
   return (
     <DashboardLayout>
-      <DiagnosticoContent />
+      <React.Suspense fallback={
+        <div className="flex-1 flex items-center justify-center p-8 text-slate-400 font-bold animate-pulse">
+          Carregando diagnósticos...
+        </div>
+      }>
+        <DiagnosticoContent />
+      </React.Suspense>
     </DashboardLayout>
   );
 }

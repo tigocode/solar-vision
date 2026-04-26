@@ -201,7 +201,7 @@ export default function EditorPropertiesPanel({ block, onChange, onDelete, onClo
               </label>
               <select 
                 id="severity-filter"
-                value={block.config?.severityFilter || 'Todos'}
+                value={(block.config?.severityFilter as string) || 'Todos'}
                 onChange={(e) => handleConfigChange({ severityFilter: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold bg-slate-50 focus:outline-none focus:border-amber-500 transition-all text-slate-700 h-10"
               >
@@ -219,7 +219,7 @@ export default function EditorPropertiesPanel({ block, onChange, onDelete, onClo
                <input 
                  id="auto-height"
                  type="checkbox"
-                 checked={block.config?.autoHeight || false}
+                 checked={(block.config?.autoHeight as boolean) || false}
                  onChange={(e) => handleConfigChange({ autoHeight: e.target.checked })}
                  className="w-4 h-4 accent-amber-500 cursor-pointer"
                />
